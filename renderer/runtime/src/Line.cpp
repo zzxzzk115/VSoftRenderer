@@ -11,31 +11,37 @@
 
 namespace VSoftRenderer
 {
-    void Line::Draw(const Color& color)
+    std::shared_ptr<Line> Line::s_Instance = nullptr;
+
+    void Line::Draw(const Color& color) const
     {
         bool steep = false;
-        if (std::abs(m_X0 - m_X1) < std::abs(m_Y0 - m_Y1))
+        int x0 = m_P0.X;
+        int y0 = m_P0.Y;
+        int x1 = m_P1.X;
+        int y1 = m_P1.Y;
+        if (std::abs(x0 - x1) < std::abs(y0 - y1))
         {
             // steep, then transpose
-            std::swap(m_X0, m_Y0);
-            std::swap(m_X1, m_Y1);
+            std::swap(x0, y0);
+            std::swap(x1, y1);
             steep = true;
         }
 
         // left to right order
-        if (m_X0 > m_X1)
+        if (x0 > x1)
         {
-            std::swap(m_X0, m_X1);
-            std::swap(m_Y0, m_Y1);
+            std::swap(x0, x1);
+            std::swap(y0, y1);
         }
 
-        int dx = m_X1 - m_X0;
-        int dy = m_Y1 - m_Y0;
+        int dx = x1 - x0;
+        int dy = y1 - y0;
         float derror2 = std::abs(dy) * 2;
         float error2 = 0;
-        int y = m_Y0;
+        int y = y0;
 
-        for (int x = m_X0; x <= m_X1; ++x) 
+        for (int x = x0; x <= x1; ++x) 
         {
             if (steep)
             {
@@ -48,21 +54,35 @@ namespace VSoftRenderer
             error2 += derror2;
             if (error2 > dx)
             {
-                y += (m_Y1 > m_Y0 ? 1 : -1);
+                y += (y1 > y0 ? 1 : -1);
                 error2 -= dx * 2;
             }
         } 
     }
 
-    void Line::Draw(int x0, int y0, int x1, int y1, const Color& color)
+    std::shared_ptr<Line>& Line::GetInstance()
     {
-        Line tempLine(x0, y0, x1, y1);
-        tempLine.Draw(color);
+        if (s_Instance == nullptr)
+        {
+            s_Instance = std::make_shared<Line>();
+        }
+
+        return s_Instance;
     }
 
-    void Line::Draw(Vector2Int v0, Vector2Int v1, const Color& color)
+    void Line::Draw(int x0, int y0, int x1, int y1, const Color& color)
     {
-        Line tempLine(v0, v1);
-        tempLine.Draw(color);
+        auto& instance = GetInstance();
+        instance->m_P0 = {x0, y0};
+        instance->m_P1 = {x1, y1};
+        instance->Draw(color);
+    }
+
+    void Line::Draw(Vector2Int p0, Vector2Int p1, const Color& color)
+    {
+        auto& instance = GetInstance();
+        instance->m_P0 = p0;
+        instance->m_P1 = p1;
+        instance->Draw(color);
     }
 } // namespace VSoftRenderer

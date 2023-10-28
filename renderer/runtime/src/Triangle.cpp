@@ -8,10 +8,11 @@
 #include "VSoftRenderer/Extern.h"
 #include "VSoftRenderer/Line.h"
 #include <algorithm>
-#include <stdexcept>
 
 namespace VSoftRenderer
 {
+    std::shared_ptr<Triangle> Triangle::s_Instance = nullptr;
+
     void Triangle::DrawWire(const Color& color)
     {
         Line::Draw(m_V0, m_V1, color);
@@ -62,15 +63,31 @@ namespace VSoftRenderer
         }
     }
 
+    std::shared_ptr<Triangle>& Triangle::GetInstance()
+    {
+        if (s_Instance == nullptr)
+        {
+            s_Instance = std::make_shared<Triangle>();
+        }
+
+        return s_Instance;
+    }
+
     void Triangle::DrawWire(Vector2Int v0, Vector2Int v1, Vector2Int v2, const Color& color)
     {
-        Triangle tempTriangle(v0, v1, v2);
-        tempTriangle.DrawWire(color);
+        auto& instance = GetInstance();
+        instance->m_V0 = v0;
+        instance->m_V1 = v1;
+        instance->m_V2 = v2;
+        instance->DrawWire(color);
     }
 
     void Triangle::DrawFilled(Vector2Int v0, Vector2Int v1, Vector2Int v2, const Color& color)
     {
-        Triangle tempTriangle(v0, v1, v2);
-        tempTriangle.DrawFilled(color);
+        auto& instance = GetInstance();
+        instance->m_V0 = v0;
+        instance->m_V1 = v1;
+        instance->m_V2 = v2;
+        instance->DrawFilled(color);
     }
 } // namespace VSoftRenderer
