@@ -24,10 +24,15 @@ namespace VSoftRenderer
             std::swap(m_X0, m_X1);
             std::swap(m_Y0, m_Y1);
         }
+
+        int dx = m_X1 - m_X0;
+        int dy = m_Y1 - m_Y0;
+        float derror = std::abs(dy / static_cast<float>(dx));
+        float error = 0;
+        int y = m_Y0;
+
         for (int x = m_X0; x <= m_X1; ++x) 
-        { 
-            float t = static_cast<float>(x-m_X0) / (m_X1-m_X0);
-            int y = m_Y0 * (1.0f - t) + m_Y1 * t;
+        {
             if (steep)
             {
                 DrawPixel(y, x, m_Color);
@@ -35,6 +40,12 @@ namespace VSoftRenderer
             else
             {
                 DrawPixel(x, y, m_Color);
+            }
+            error += derror;
+            if (error > 0.5f)
+            {
+                y += (m_Y1 > m_Y0 ? 1 : -1);
+                error -= 1.0f;
             }
         } 
     }
