@@ -103,9 +103,9 @@ int main()
 //        }
 
             // Draw triangles by old school method: line sweeping
-            t0.DrawWire(VSoftRenderer::Color::COLOR_RED);
-            t1.DrawWire(VSoftRenderer::Color::COLOR_WHITE);
-            t2.DrawWire(VSoftRenderer::Color::COLOR_GREEN);
+            t0.DrawFilled(VSoftRenderer::Color::COLOR_RED);
+            t1.DrawFilled(VSoftRenderer::Color::COLOR_WHITE);
+            t2.DrawFilled(VSoftRenderer::Color::COLOR_GREEN);
         renderTexture.EndMode();
 
         BeginDrawing();
