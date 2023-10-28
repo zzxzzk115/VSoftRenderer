@@ -11,10 +11,7 @@
 
 namespace VSoftRenderer
 {
-    Line::Line(int x0, int y0, int x1, int y1, const Color& color)
-        : m_X0(x0), m_Y0(y0), m_X1(x1), m_Y1(y1), m_Color(color) {}
-
-    void Line::Draw()
+    void Line::Draw(const Color& color)
     {
         bool steep = false;
         if (std::abs(m_X0 - m_X1) < std::abs(m_Y0 - m_Y1))
@@ -42,11 +39,11 @@ namespace VSoftRenderer
         {
             if (steep)
             {
-                VDrawPixel(y, x, m_Color);
+                VDrawPixel(y, x, color);
             }
             else
             {
-                VDrawPixel(x, y, m_Color);
+                VDrawPixel(x, y, color);
             }
             error2 += derror2;
             if (error2 > dx)
@@ -59,7 +56,13 @@ namespace VSoftRenderer
 
     void Line::Draw(int x0, int y0, int x1, int y1, const Color& color)
     {
-        Line tempLine(x0, y0, x1, y1, color);
-        tempLine.Draw();
+        Line tempLine(x0, y0, x1, y1);
+        tempLine.Draw(color);
+    }
+
+    void Line::Draw(Vector2Int v0, Vector2Int v1, const Color& color)
+    {
+        Line tempLine(v0, v1);
+        tempLine.Draw(color);
     }
 } // namespace VSoftRenderer
