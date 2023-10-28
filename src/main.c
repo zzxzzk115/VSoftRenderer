@@ -1,4 +1,6 @@
-#include "raylib.h"
+#include "line.h"
+
+#include <raylib.h>
 
 int main(void)
 {
@@ -13,13 +15,8 @@ int main(void)
             int frameBufferWidth = GetRenderWidth();
             int frameBufferHeight = GetRenderHeight();
 
-            // example: draw an ugly line from top-left to bottom-right
-            float k = (float)frameBufferHeight / frameBufferWidth;
-            for (int x = 0; x < frameBufferWidth; ++x)
-            {
-                int y = k * x;
-                DrawPixel(x, y, WHITE);
-            }
+            // Attempt 1:
+            VDrawLine(0, 0, frameBufferWidth - 1, frameBufferHeight - 1, WHITE);
 
         EndDrawing();
     }
