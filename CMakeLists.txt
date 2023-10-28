@@ -36,7 +36,7 @@ set(BINARY_ROOT_DIR "${CMAKE_INSTALL_PREFIX}/")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${VSR_ROOT_DIR}/bin)
 set(CMAKE_CONFIGURATION_TYPES "Debug;Release" CACHE STRING "" FORCE)
 
-add_executable(${PROJECT_NAME} src/main.cpp src/line.cpp)
+add_executable(${PROJECT_NAME} src/main.cpp src/VLine.cpp)
 target_include_directories(${PROJECT_NAME} PUBLIC include)
 #set(raylib_VERBOSE 1)
 set_target_properties(${PROJECT_NAME} PROPERTIES CXX_STANDARD 17)

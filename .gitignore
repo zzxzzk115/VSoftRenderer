@@ -25,8 +25,7 @@ out/
 
 # Clion Project
 .idea/
-cmake-build-debug/
-cmake-build-release/
+cmake-build*/
 
 # Logs
 *.log

@@ -1,4 +1,4 @@
-#include "VSoftRenderer/Line.h"
+#include "VSoftRenderer/VLine.h"
 
 namespace VSoftRenderer
 {
@@ -9,7 +9,7 @@ namespace VSoftRenderer
     {
         for (int x = m_X0; x <= m_X1; ++x) 
         { 
-            float t = (float)(x-m_X0) / (m_X1-m_X0); 
+            float t = static_cast<float>(x-m_X0) / (m_X1-m_X0);
             int y = m_Y0 * (1.0f - t) + m_Y1 * t; 
             DrawPixel(x, y, m_Color); 
         } 
