@@ -1,13 +1,19 @@
+//
+// Line.h
+//
+// Created or modified by Kexuan Zhang on 2023/10/28 15:50.
+//
+
 #pragma once
 
-#include <raylib-cpp.hpp>
+#include "VSoftRenderer/Color.h"
 
 namespace VSoftRenderer
 {
-    class VLine
+    class Line
     {
     public:
-        VLine(int x0, int y0, int x1, int y1, const Color& color);
+        Line(int x0, int y0, int x1, int y1, const Color& color);
         void Draw();
 
         static void Draw(int x0, int y0, int x1, int y1, const Color& color);

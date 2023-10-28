@@ -36,17 +36,4 @@ set(BINARY_ROOT_DIR "${CMAKE_INSTALL_PREFIX}/")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${VSR_ROOT_DIR}/bin)
 set(CMAKE_CONFIGURATION_TYPES "Debug;Release" CACHE STRING "" FORCE)
 
-add_executable(${PROJECT_NAME} src/main.cpp src/VLine.cpp)
-target_include_directories(${PROJECT_NAME} PUBLIC include)
-#set(raylib_VERBOSE 1)
-set_target_properties(${PROJECT_NAME} PROPERTIES CXX_STANDARD 17)
-target_link_libraries(${PROJECT_NAME} PUBLIC raylib raylib_cpp)
-
-# Web Configurations
-if (${PLATFORM} STREQUAL "Web")
-    # Tell Emscripten to build an example.html file.
-    set_target_properties(${PROJECT_NAME} PROPERTIES SUFFIX ".html")
-
-    # Required linker flags for using Raylib with Emscripten
-    target_link_options(${PROJECT_NAME} PRIVATE -sEXPORTED_FUNCTIONS=['_main','_malloc'] -sEXPORTED_RUNTIME_METHODS=ccall -sUSE_GLFW=3)
-endif()
+add_subdirectory(renderer)

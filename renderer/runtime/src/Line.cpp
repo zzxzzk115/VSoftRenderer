@@ -1,13 +1,20 @@
-#include "VSoftRenderer/VLine.h"
+//
+// Line.cpp
+//
+// Created or modified by Kexuan Zhang on 2023/10/28 15:50.
+//
+
+#include "VSoftRenderer/Line.h"
+#include "VSoftRenderer/Extern.h"
 
 #include <algorithm>
 
 namespace VSoftRenderer
 {
-    VLine::VLine(int x0, int y0, int x1, int y1, const Color& color)
+    Line::Line(int x0, int y0, int x1, int y1, const Color& color)
         : m_X0(x0), m_Y0(y0), m_X1(x1), m_Y1(y1), m_Color(color) {}
 
-    void VLine::Draw()
+    void Line::Draw()
     {
         bool steep = false;
         if (std::abs(m_X0 - m_X1) < std::abs(m_Y0 - m_Y1))
@@ -35,11 +42,11 @@ namespace VSoftRenderer
         {
             if (steep)
             {
-                DrawPixel(y, x, m_Color);
+                VDrawPixel(y, x, m_Color);
             }
             else
             {
-                DrawPixel(x, y, m_Color);
+                VDrawPixel(x, y, m_Color);
             }
             error2 += derror2;
             if (error2 > dx)
@@ -50,9 +57,9 @@ namespace VSoftRenderer
         } 
     }
 
-    void VLine::Draw(int x0, int y0, int x1, int y1, const Color& color)
+    void Line::Draw(int x0, int y0, int x1, int y1, const Color& color)
     {
-        VLine tempLine(x0, y0, x1, y1, color);
+        Line tempLine(x0, y0, x1, y1, color);
         tempLine.Draw();
     }
 } // namespace VSoftRenderer
