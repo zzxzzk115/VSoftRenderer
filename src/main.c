@@ -15,7 +15,7 @@ int main(void)
             int frameBufferWidth = GetRenderWidth();
             int frameBufferHeight = GetRenderHeight();
 
-            // Attempt 1:
+            // Attempt 2:
             VDrawLine(0, 0, frameBufferWidth - 1, frameBufferHeight - 1, WHITE);
 
         EndDrawing();
