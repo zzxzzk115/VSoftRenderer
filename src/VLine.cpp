@@ -27,8 +27,8 @@ namespace VSoftRenderer
 
         int dx = m_X1 - m_X0;
         int dy = m_Y1 - m_Y0;
-        float derror = std::abs(dy / static_cast<float>(dx));
-        float error = 0;
+        float derror2 = std::abs(dy) * 2;
+        float error2 = 0;
         int y = m_Y0;
 
         for (int x = m_X0; x <= m_X1; ++x) 
@@ -41,11 +41,11 @@ namespace VSoftRenderer
             {
                 DrawPixel(x, y, m_Color);
             }
-            error += derror;
-            if (error > 0.5f)
+            error2 += derror2;
+            if (error2 > dx)
             {
                 y += (m_Y1 > m_Y0 ? 1 : -1);
-                error -= 1.0f;
+                error2 -= dx * 2;
             }
         } 
     }
