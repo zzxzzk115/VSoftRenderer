@@ -8,7 +8,9 @@ namespace VSoftRenderer
     {
     public:
         VLine(int x0, int y0, int x1, int y1, const Color& color);
-        void Draw() const;
+        void Draw();
+
+        static void Draw(int x0, int y0, int x1, int y1, const Color& color);
 
     private:
         int   m_X0;

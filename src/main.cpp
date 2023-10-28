@@ -15,16 +15,12 @@ int main()
 
     SetTargetFPS(60);
 
-    VLine line1(13, 20, 80, 40, WHITE);
-    VLine line2(20, 13, 40, 80, RED);
-    VLine line3(80, 40, 13, 20, RED);
-
     while (!window.ShouldClose())
     {
         renderTexture.BeginMode();
-            line1.Draw();
-            line2.Draw();
-            line3.Draw();
+            VLine::Draw(13, 20, 80, 40, WHITE);
+            VLine::Draw(20, 13, 40, 80, RED);
+            VLine::Draw(80, 40, 13, 20, RED);
         renderTexture.EndMode();
 
         BeginDrawing();
