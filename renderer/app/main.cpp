@@ -62,44 +62,57 @@ int main()
         exit(1);
     }
 
+    VSoftRenderer::Vector3 lightDirection(0, 0, -1);
+
     while (!window.ShouldClose())
     {
         renderTexture.BeginMode();
 
-        // Flat Shading Renderer
-        // Loop over shapes
-        for (size_t s = 0; s < shapes.size(); s++)
-        {
-            // Loop over faces(polygon)
-            size_t indexOffset = 0;
-            for (size_t f = 0; f < shapes[s].mesh.num_face_vertices.size(); f++)
+            // Flat Shading Renderer
+            // Loop over shapes
+            for (size_t s = 0; s < shapes.size(); s++)
             {
-                auto fv = static_cast<size_t>(shapes[s].mesh.num_face_vertices[f]);
-
-                // Loop over vertices in the face.
-                VSoftRenderer::Vector2Int* screenCoords = new VSoftRenderer::Vector2Int[3];
-                for (size_t v = 0; v < fv; v++)
+                // Loop over faces(polygon)
+                size_t indexOffset = 0;
+                for (size_t f = 0; f < shapes[s].mesh.num_face_vertices.size(); f++)
                 {
-                    auto index = shapes[s].mesh.indices[indexOffset + v];
+                    auto fv = static_cast<size_t>(shapes[s].mesh.num_face_vertices[f]);
 
-                    float x = attrib.vertices[3*size_t(index.vertex_index)+0];
-                    float y = attrib.vertices[3*size_t(index.vertex_index)+1];
+                    // Loop over vertices in the face.
+                    VSoftRenderer::Vector2Int* screenCoords = new VSoftRenderer::Vector2Int[fv];
+                    VSoftRenderer::Vector3* worldCoords = new VSoftRenderer::Vector3[fv];
+                    for (size_t v = 0; v < fv; v++)
+                    {
+                        auto index = shapes[s].mesh.indices[indexOffset + v];
 
-                    screenCoords[v] = {static_cast<int>((x+1.0f)*ScreenWidth/2.0f), static_cast<int>((y+1.0f)*ScreenHeight/2.0f)};
+                        float x = attrib.vertices[3*static_cast<size_t>(index.vertex_index)+0];
+                        float y = attrib.vertices[3*static_cast<size_t>(index.vertex_index)+1];
+                        float z = attrib.vertices[3*static_cast<size_t>(index.vertex_index)+2];
+
+                        screenCoords[v] = {static_cast<int>((x+1.0f)*ScreenWidth/2.0f), static_cast<int>((y+1.0f)*ScreenHeight/2.0f)};
+                        worldCoords[v] = {x, y, z};
+                    }
+
+                    VSoftRenderer::Vector3 normal = (worldCoords[2] - worldCoords[0]).CrossProduct(worldCoords[1] - worldCoords[0]).Normalized();
+                    float intensity = normal * lightDirection;
+                    if (intensity > 0)
+                    {
+                        VSoftRenderer::Triangle::DrawFilled(screenCoords[0],
+                                                            screenCoords[1],
+                                                            screenCoords[2],
+                                                            {
+                                                                static_cast<unsigned char>(intensity * 255.0f),
+                                                                static_cast<unsigned char>(intensity * 255.0f),
+                                                                static_cast<unsigned char>(intensity * 255.0f),
+                                                                255});
+                    }
+
+                    delete[] screenCoords;
+                    delete[] worldCoords;
+                    indexOffset += fv;
                 }
-                VSoftRenderer::Triangle::DrawFilled(screenCoords[0],
-                                                    screenCoords[1],
-                                                    screenCoords[2],
-                                                    {
-                                                        static_cast<unsigned char>(rand()%255),
-                                                        static_cast<unsigned char>(rand()%255),
-                                                        static_cast<unsigned char>(rand()%255),
-                                                        255});
-                delete(screenCoords);
-                screenCoords = nullptr;
-                indexOffset += fv;
+
             }
-        }
 
             // VSoftRenderer::Triangle::DrawFilled({10,10}, {100, 30}, {190, 160}, VSoftRenderer::Color::COLOR_RED);
         renderTexture.EndMode();
