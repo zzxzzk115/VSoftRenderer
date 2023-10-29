@@ -13,6 +13,7 @@ namespace VSoftRenderer
         int X;
         int Y;
 
+        Vector2Int() : X(0), Y(0) {}
         Vector2Int(int x, int y) : X(x), Y(y) {}
 
         Vector2Int operator + (const Vector2Int& other) const
