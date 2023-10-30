@@ -23,6 +23,7 @@ namespace VSoftRenderer
         Vector3() : X(0), Y(0), Z(0) {}
         Vector3(T x, T y, T z) : X(x), Y(y), Z(z) {}
         explicit Vector3(const Vector2<T>& v) : X(static_cast<T>(v.X)), Y(static_cast<T>(v.Y)), Z(static_cast<T>(0)) {}
+        Vector3(const Vector3<T>& v) : X(static_cast<T>(v.X)), Y(static_cast<T>(v.Y)), Z(static_cast<T>(v.Z)) {}
 
         Vector2Int DiscardZInt() const
         {

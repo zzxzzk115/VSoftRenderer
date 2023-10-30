@@ -9,6 +9,7 @@
 #include "VSoftRenderer/AABB.h"
 #include "VSoftRenderer/Color.h"
 #include "VSoftRenderer/Vector3.h"
+#include "VSoftRenderer/Texture2D.h"
 
 #include <memory>
 
@@ -24,11 +25,10 @@ namespace VSoftRenderer
         void DrawWire(const Color& color);
         void DrawFilled(const Color& color) const;
         void DrawFilledSweeping(const Color& color);
-
-        // TODO: Refactor, extract Texture class and LightSource class.
-        void DrawInterpolated(const Vector2Float* uvCoords, const Color* colors, int textureWidth, int textureHeight, float lightIntensity);
+        void DrawInterpolated(const Vector2Float* uvCoords, const Texture2D& texture, float intensity);
 
         AABBFloat GetAABB() const;
+
         Vector3Float GetBarycentricCoordinates(const Vector3Float& p) const;
 
         static std::shared_ptr<Triangle3D>& GetInstance();
@@ -36,16 +36,12 @@ namespace VSoftRenderer
         static void DrawWire(const Vector3Float& v0, const Vector3Float& v1, const Vector3Float& v2, const Color& color);
         static void DrawFilled(const Vector3Float& v0, const Vector3Float& v1, const Vector3Float& v2, const Color& color);
         static void DrawFilledSweeping(const Vector3Float& v0, const Vector3Float& v1, const Vector3Float& v2, const Color& color);
-
-        // TODO: Refactor, extract Texture class and LightSource class.
-        static void DrawInterpolated(const Vector3Float& v0, const Vector3Float& v1, const Vector3Float& v2, const Vector2Float* uvCoords, const Color* colors, int textureWidth, int textureHeight, float lightIntensity);
+        static void DrawInterpolated(const Vector3Float& v0, const Vector3Float& v1, const Vector3Float& v2, const Vector2Float* uvCoords, const Texture2D& texture, float intensity);
 
         static void DrawWire(const Vector3Int & v0, const Vector3Int& v1, const Vector3Int& v2, const Color& color);
         static void DrawFilled(const Vector3Int& v0, const Vector3Int& v1, const Vector3Int& v2, const Color& color);
         static void DrawFilledSweeping(const Vector3Int& v0, const Vector3Int& v1, const Vector3Int& v2, const Color& color);
-
-        // TODO: Refactor, extract Texture class and LightSource class.
-        static void DrawInterpolated(const Vector3Int& v0, const Vector3Int& v1, const Vector3Int& v2, const Vector2Float* uvCoords, const Color* colors, int textureWidth, int textureHeight, float lightIntensity);
+        static void DrawInterpolated(const Vector3Int& v0, const Vector3Int& v1, const Vector3Int& v2, const Vector2Float* uvCoords, const Texture2D& texture, float intensity);
     private:
         Vector3Float m_Vertices[3];
 

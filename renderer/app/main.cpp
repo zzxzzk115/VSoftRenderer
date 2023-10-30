@@ -4,9 +4,11 @@
 // Created or modified by Kexuan Zhang on 2023/10/28 15:50.
 //
 
+#include "VSoftRenderer/DirectionalLight.h"
 #include "VSoftRenderer/FrameBuffer.h"
 #include "VSoftRenderer/Line.h"
 #include "VSoftRenderer/RenderConfig.h"
+#include "VSoftRenderer/Texture2D.h"
 #include "VSoftRenderer/Triangle3D.h"
 #include "VSoftRenderer/Utils.h"
 
@@ -79,10 +81,10 @@ int main()
 
     int textureImageWidth  = textureImageData.width;
     int textureImageHeight = textureImageData.height;
-
     VSoftRenderer::Color* textureColors = (VSoftRenderer::Color*)LoadImageColors(textureImageData);
+    VSoftRenderer::Texture2D texture(textureImageWidth, textureImageHeight, textureColors);
 
-    VSoftRenderer::Vector3Float lightDirection(0, 0, -1);
+    VSoftRenderer::DirectionalLight light({0, 0, -1});
 
     while (!window.ShouldClose())
     {
@@ -119,16 +121,15 @@ int main()
                     }
 
                     VSoftRenderer::Vector3Float normal = (worldCoords[2] - worldCoords[0]).CrossProduct(worldCoords[1] - worldCoords[0]).Normalized();
-                    float intensity = normal * lightDirection;
+                    float intensity = normal * light.GetDirection();
+                    // back-face culling
                     if (intensity > 0)
                     {
                         VSoftRenderer::Triangle3D::DrawInterpolated(screenCoords[0],
                                                                     screenCoords[1],
                                                                     screenCoords[2],
                                                                     uvCoords,
-                                                                    textureColors,
-                                                                    textureImageWidth,
-                                                                    textureImageHeight,
+                                                                    texture,
                                                                     intensity);
                     }
                     indexOffset += fv;

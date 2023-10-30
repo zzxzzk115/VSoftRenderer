@@ -20,6 +20,16 @@ namespace VSoftRenderer
             static_cast<int>(v.Z) };
     }
 
+    Vector3Float Utils::World2ScreenFloat(const Vector3Float& v)
+    {
+        auto result = World2Screen(v);
+        return {
+            static_cast<float >(result.X),
+                static_cast<float>(result.Y),
+                static_cast<float>(result.Z)
+        };
+    }
+
     Vector3Float Utils::Vector3Int2Float(const Vector3Int& v)
     {
         return Vector3Float(static_cast<float>(v.X),
