@@ -6,6 +6,7 @@
 
 #pragma once
 
+
 namespace VSoftRenderer
 {
     struct Vector2Int

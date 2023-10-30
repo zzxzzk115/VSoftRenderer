@@ -19,6 +19,12 @@ namespace VSoftRenderer
 
         Vector3() : X(0.0f), Y(0.0f), Z(0.0f) {}
         Vector3(float x, float y, float z) : X(x), Y(y), Z(z) {}
+        explicit Vector3(const Vector2Int& v) : X(v.X), Y(v.Y) {}
+
+        Vector2Int DiscardZ() const
+        {
+            return {static_cast<int>(X), static_cast<int>(Y)};
+        }
 
         Vector3 operator + (const Vector3& other) const
         {

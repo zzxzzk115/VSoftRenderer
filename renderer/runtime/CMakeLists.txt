@@ -5,8 +5,9 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 add_library(${TARGET_NAME} src/Line.cpp
         src/Color.cpp
-        src/Triangle.cpp
-        src/RenderConfig.cpp)
+        src/Triangle2D.cpp
+        src/RenderConfig.cpp
+        src/FrameBuffer.cpp)
 
 set_target_properties(${TARGET_NAME} PROPERTIES CXX_STANDARD 17)
 set_target_properties(${TARGET_NAME} PROPERTIES FOLDER "Runtime")

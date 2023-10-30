@@ -1,28 +1,28 @@
 //
-// Triangle.cpp
+// Triangle2D.cpp
 //
 // Created or modified by Kexuan Zhang on 2023/10/28 16:07.
 //
 
-#include "VSoftRenderer/Triangle.h"
-#include "VSoftRenderer/Extern.h"
+#include "VSoftRenderer/FrameBuffer.h"
 #include "VSoftRenderer/Line.h"
 #include "VSoftRenderer/RenderConfig.h"
+#include "VSoftRenderer/Triangle2D.h"
 
 #include <algorithm>
 
 namespace VSoftRenderer
 {
-    std::shared_ptr<Triangle> Triangle::s_Instance = nullptr;
+    std::shared_ptr<Triangle2D> Triangle2D::s_Instance = nullptr;
 
-    void Triangle::DrawWire(const Color& color)
+    void Triangle2D::DrawWire(const Color& color)
     {
         Line::Draw(m_Vertices[0], m_Vertices[1], color);
         Line::Draw(m_Vertices[1], m_Vertices[2], color);
         Line::Draw(m_Vertices[2], m_Vertices[0], color);
     }
 
-    void Triangle::DrawFilled(const Color& color) const
+    void Triangle2D::DrawFilled(const Color& color) const
     {
         Vector2Int p;
         auto aabb = GetAABB();
@@ -32,12 +32,12 @@ namespace VSoftRenderer
             {
                 Vector3 bcScreen  = GetBarycentricCoordinates(p);
                 if (bcScreen.X < 0 || bcScreen.Y < 0 || bcScreen.Z < 0) continue;
-                VDrawPixel(p.X, p.Y, color);
+                FrameBuffer::GetInstance()->SetPixel(p.X, p.Y, color);
             }
         }
     }
 
-    void Triangle::DrawFilledSweeping(const Color& color)
+    void Triangle2D::DrawFilledSweeping(const Color& color)
     {
         // old-school line sweeping
         // first sort the vertices by using bubble sort.
@@ -60,7 +60,7 @@ namespace VSoftRenderer
             if (a.X > b.X) std::swap(a, b);
             for (int j = a.X; j <= b.X; ++j)
             {
-                VDrawPixel(j, y, color);
+                FrameBuffer::GetInstance()->SetPixel(j, y, color);
             }
         }
 
@@ -75,12 +75,12 @@ namespace VSoftRenderer
             if (a.X > b.X) std::swap(a, b);
             for (int j = a.X; j <= b.X; ++j)
             {
-                VDrawPixel(j, y, color);
+                FrameBuffer::GetInstance()->SetPixel(j, y, color);
             }
         }
     }
 
-    AABB Triangle::GetAABB() const
+    AABB Triangle2D::GetAABB() const
     {
         const auto& frameBufferSize = RenderConfig::GetFrameBufferSize();
         AABB aabb;
@@ -102,7 +102,7 @@ namespace VSoftRenderer
         return aabb;
     }
 
-    Vector3 Triangle::GetBarycentricCoordinates(Vector2Int p) const
+    Vector3 Triangle2D::GetBarycentricCoordinates(Vector2Int p) const
     {
         Vector2Int PA(m_Vertices[0].X - p.X, m_Vertices[0].Y - p.Y);
         Vector2Int AB(m_Vertices[1].X - m_Vertices[0].X, m_Vertices[1].Y - m_Vertices[0].Y);
@@ -124,17 +124,17 @@ namespace VSoftRenderer
     }
 
 
-    std::shared_ptr<Triangle>& Triangle::GetInstance()
+    std::shared_ptr<Triangle2D>& Triangle2D::GetInstance()
     {
         if (s_Instance == nullptr)
         {
-            s_Instance = std::make_shared<Triangle>();
+            s_Instance = std::make_shared<Triangle2D>();
         }
 
         return s_Instance;
     }
 
-    void Triangle::DrawWire(Vector2Int v0, Vector2Int v1, Vector2Int v2, const Color& color)
+    void Triangle2D::DrawWire(Vector2Int v0, Vector2Int v1, Vector2Int v2, const Color& color)
     {
         auto& instance = GetInstance();
         instance->m_Vertices[0] = v0;
@@ -143,7 +143,7 @@ namespace VSoftRenderer
         instance->DrawWire(color);
     }
 
-    void Triangle::DrawFilled(Vector2Int v0, Vector2Int v1, Vector2Int v2, const Color& color)
+    void Triangle2D::DrawFilled(Vector2Int v0, Vector2Int v1, Vector2Int v2, const Color& color)
     {
         auto& instance = GetInstance();
         instance->m_Vertices[0] = v0;
@@ -152,7 +152,7 @@ namespace VSoftRenderer
         instance->DrawFilled(color);
     }
     
-    void Triangle::DrawFilledSweeping(Vector2Int v0, Vector2Int v1, Vector2Int v2, const Color& color)
+    void Triangle2D::DrawFilledSweeping(Vector2Int v0, Vector2Int v1, Vector2Int v2, const Color& color)
     {
         auto& instance = GetInstance();
         instance->m_Vertices[0] = v0;

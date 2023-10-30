@@ -4,10 +4,10 @@
 // Created or modified by Kexuan Zhang on 2023/10/28 15:50.
 //
 
-#include "VSoftRenderer/Extern.h"
+#include "VSoftRenderer/FrameBuffer.h"
 #include "VSoftRenderer/Line.h"
 #include "VSoftRenderer/RenderConfig.h"
-#include "VSoftRenderer/Triangle.h"
+#include "VSoftRenderer/Triangle2D.h"
 
 #include <raylib-cpp.hpp>
 
@@ -16,15 +16,21 @@
 
 #include <iostream>
 
-// implement extern VDrawPixel funtion by using Raylib
-void VDrawPixel(int x, int y, const VSoftRenderer::Color& color)
-{
-    Color rayColor{color.R, color.G, color.B, color.A};
-    DrawPixel(x, y, rayColor);
-}
-
 const int ScreenWidth = 800;
 const int ScreenHeight = 800;
+
+void DrawFrameBuffer()
+{
+    auto frameBufferSize = VSoftRenderer::FrameBuffer::GetInstance()->GetSize();
+    for (int i = 0; i < frameBufferSize.X; ++i)
+    {
+        for (int j = 0; j < frameBufferSize.Y; ++j)
+        {
+            auto color = VSoftRenderer::FrameBuffer::GetInstance()->GetPixel(i, j).PixelColor;
+            DrawPixel(i, j, {color.R, color.G, color.B, color.A});
+        }
+    }
+}
 
 int main() 
 {
@@ -97,7 +103,7 @@ int main()
                     float intensity = normal * lightDirection;
                     if (intensity > 0)
                     {
-                        VSoftRenderer::Triangle::DrawFilled(screenCoords[0],
+                        VSoftRenderer::Triangle2D::DrawFilled(screenCoords[0],
                                                             screenCoords[1],
                                                             screenCoords[2],
                                                             {
@@ -114,7 +120,8 @@ int main()
 
             }
 
-            // VSoftRenderer::Triangle::DrawFilled({10,10}, {100, 30}, {190, 160}, VSoftRenderer::Color::COLOR_RED);
+            // Draw FrameBuffer
+            DrawFrameBuffer();
         renderTexture.EndMode();
 
         BeginDrawing();

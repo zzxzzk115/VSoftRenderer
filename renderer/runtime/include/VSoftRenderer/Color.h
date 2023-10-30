@@ -15,7 +15,7 @@ namespace VSoftRenderer
         unsigned char B;
         unsigned char A;
 
-        Color() = default;
+        Color() : R(0), G(0), B(0), A(0) {}
         Color(unsigned char r, unsigned char g, unsigned char b, unsigned char a = 255)
             : R(r), G(g), B(b), A(a) {}
 

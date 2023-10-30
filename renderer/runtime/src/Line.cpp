@@ -5,7 +5,7 @@
 //
 
 #include "VSoftRenderer/Line.h"
-#include "VSoftRenderer/Extern.h"
+#include "VSoftRenderer/FrameBuffer.h"
 
 #include <algorithm>
 
@@ -45,11 +45,11 @@ namespace VSoftRenderer
         {
             if (steep)
             {
-                VDrawPixel(y, x, color);
+                FrameBuffer::GetInstance()->SetPixel(y, x, color);
             }
             else
             {
-                VDrawPixel(x, y, color);
+                FrameBuffer::GetInstance()->SetPixel(x, y, color);
             }
             error2 += derror2;
             if (error2 > dx)
