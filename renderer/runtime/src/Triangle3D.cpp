@@ -16,6 +16,24 @@ namespace VSoftRenderer
 {
     std::shared_ptr<Triangle3D> Triangle3D::s_Instance = nullptr;
 
+    Triangle3D::Triangle3D(const Vector3Float& v0,
+                           const Vector3Float& v1,
+                           const Vector3Float& v2)
+    {
+        m_Vertices[0] = v0;
+        m_Vertices[1] = v1;
+        m_Vertices[2] = v2;
+    }
+
+    Triangle3D::Triangle3D(const Vector3Int& v0,
+                           const Vector3Int& v1,
+                           const Vector3Int& v2)
+    {
+        m_Vertices[0] = Utils::Vector3Int2Float(v0);
+        m_Vertices[1] = Utils::Vector3Int2Float(v1);
+        m_Vertices[2] = Utils::Vector3Int2Float(v2);
+    }
+
     void Triangle3D::DrawWire(const Color& color)
     {
         Line::Draw(m_Vertices[0].DiscardZInt(), m_Vertices[1].DiscardZInt(), color);
@@ -33,6 +51,7 @@ namespace VSoftRenderer
             {
                 Vector3 bcScreen  = GetBarycentricCoordinates(p);
                 if (bcScreen.X < 0 || bcScreen.Y < 0 || bcScreen.Z < 0) continue;
+                // Interpolate Z value by barycentric coordinates
                 p.Z = 0;
                 p.Z += m_Vertices[0].Z * bcScreen.X;
                 p.Z += m_Vertices[1].Z * bcScreen.Y;
@@ -95,6 +114,39 @@ namespace VSoftRenderer
         }
     }
 
+    void Triangle3D::DrawInterpolated(const Vector2Float* uvCoords, const Color* colors, int textureWidth, int textureHeight, float lightIntensity)
+    {
+        Vector3Float p;
+        auto aabb = GetAABB();
+        for (p.X = aabb.GetMin().X; p.X <= aabb.GetMax().X; ++p.X)
+        {
+            for (p.Y = aabb.GetMin().Y; p.Y <= aabb.GetMax().Y; ++p.Y)
+            {
+                Vector3 bcScreen  = GetBarycentricCoordinates(p);
+                if (bcScreen.X < 0 || bcScreen.Y < 0 || bcScreen.Z < 0) continue;
+                // Interpolate uv coordinates by barycentric coordinates
+                Vector2Float interpolatedUV = uvCoords[0] * bcScreen.X +
+                                              uvCoords[1] * bcScreen.Y +
+                                              uvCoords[2] * bcScreen.Z;
+                // Interpolate Z value by barycentric coordinates
+                p.Z = 0;
+                p.Z += m_Vertices[0].Z * bcScreen.X;
+                p.Z += m_Vertices[1].Z * bcScreen.Y;
+                p.Z += m_Vertices[2].Z * bcScreen.Z;
+                float zBufferValue =
+                    FrameBuffer::GetInstance()->GetZBufferValue(static_cast<int>(p.X), static_cast<int>(p.Y));
+                if (zBufferValue < p.Z)
+                {
+                    int textureX = static_cast<int>(interpolatedUV.X * textureWidth);
+                    int textureY = static_cast<int>((1.0f - interpolatedUV.Y) * textureHeight);
+                    auto color = colors[textureY * textureWidth + textureX] * lightIntensity;
+                    FrameBuffer::GetInstance()->SetZBufferValue(static_cast<int>(p.X), static_cast<int>(p.Y), p.Z);
+                    FrameBuffer::GetInstance()->SetPixel(p.X, p.Y, color);
+                }
+            }
+        }
+    }
+
     AABBFloat Triangle3D::GetAABB() const
     {
         const auto& frameBufferSize = RenderConfig::GetFrameBufferSize();
@@ -148,7 +200,10 @@ namespace VSoftRenderer
         return s_Instance;
     }
 
-    void Triangle3D::DrawWire(const Vector3Float& v0, const Vector3Float& v1, const Vector3Float& v2, const Color& color)
+    void Triangle3D::DrawWire(const Vector3Float& v0,
+                              const Vector3Float& v1,
+                              const Vector3Float& v2,
+                              const Color& color)
     {
         auto& instance = GetInstance();
         instance->m_Vertices[0] = v0;
@@ -157,7 +212,10 @@ namespace VSoftRenderer
         instance->DrawWire(color);
     }
 
-    void Triangle3D::DrawFilled(const Vector3Float& v0, const Vector3Float& v1, const Vector3Float& v2, const Color& color)
+    void Triangle3D::DrawFilled(const Vector3Float& v0,
+                                const Vector3Float& v1,
+                                const Vector3Float& v2,
+                                const Color& color)
     {
         auto& instance = GetInstance();
         instance->m_Vertices[0] = v0;
@@ -166,7 +224,10 @@ namespace VSoftRenderer
         instance->DrawFilled(color);
     }
 
-    void Triangle3D::DrawFilledSweeping(const Vector3Float& v0, const Vector3Float& v1, const Vector3Float& v2, const Color& color)
+    void Triangle3D::DrawFilledSweeping(const Vector3Float& v0,
+                                        const Vector3Float& v1,
+                                        const Vector3Float& v2,
+                                        const Color& color)
     {
         auto& instance = GetInstance();
         instance->m_Vertices[0] = v0;
@@ -175,7 +236,26 @@ namespace VSoftRenderer
         instance->DrawFilledSweeping(color);
     }
 
-    void Triangle3D::DrawWire(const Vector3Int & v0, const Vector3Int& v1, const Vector3Int& v2, const Color& color)
+    void Triangle3D::DrawInterpolated(const Vector3Float& v0,
+                                      const Vector3Float& v1,
+                                      const Vector3Float& v2,
+                                      const Vector2Float* uvCoords,
+                                      const Color*        colors,
+                                      int                 textureWidth,
+                                      int                 textureHeight,
+                                      float               lightIntensity)
+    {
+        auto& instance = GetInstance();
+        instance->m_Vertices[0] = v0;
+        instance->m_Vertices[1] = v1;
+        instance->m_Vertices[2] = v2;
+        instance->DrawInterpolated(uvCoords, colors, textureWidth, textureHeight, lightIntensity);
+    }
+
+    void Triangle3D::DrawWire(const Vector3Int & v0,
+                              const Vector3Int& v1,
+                              const Vector3Int& v2,
+                              const Color& color)
     {
         auto& instance = GetInstance();
         instance->m_Vertices[0] = Utils::Vector3Int2Float(v0);
@@ -184,7 +264,10 @@ namespace VSoftRenderer
         instance->DrawWire(color);
     }
 
-    void Triangle3D::DrawFilled(const Vector3Int& v0, const Vector3Int& v1, const Vector3Int& v2, const Color& color)
+    void Triangle3D::DrawFilled(const Vector3Int& v0,
+                                const Vector3Int& v1,
+                                const Vector3Int& v2,
+                                const Color& color)
     {
         auto& instance = GetInstance();
         instance->m_Vertices[0] = Utils::Vector3Int2Float(v0);
@@ -193,12 +276,31 @@ namespace VSoftRenderer
         instance->DrawFilled(color);
     }
 
-    void Triangle3D::DrawFilledSweeping(const Vector3Int& v0, const Vector3Int& v1, const Vector3Int& v2, const Color& color)
+    void Triangle3D::DrawFilledSweeping(const Vector3Int& v0,
+                                        const Vector3Int& v1,
+                                        const Vector3Int& v2,
+                                        const Color& color)
     {
         auto& instance = GetInstance();
         instance->m_Vertices[0] = Utils::Vector3Int2Float(v0);
         instance->m_Vertices[1] = Utils::Vector3Int2Float(v1);
         instance->m_Vertices[2] = Utils::Vector3Int2Float(v2);
         instance->DrawFilledSweeping(color);
+    }
+
+    void Triangle3D::DrawInterpolated(const Vector3Int&   v0,
+                                      const Vector3Int&   v1,
+                                      const Vector3Int&   v2,
+                                      const Vector2Float* uvCoords,
+                                      const Color*        colors,
+                                      int                 textureWidth,
+                                      int                 textureHeight,
+                                      float               lightIntensity)
+    {
+        auto& instance = GetInstance();
+        instance->m_Vertices[0] = Utils::Vector3Int2Float(v0);
+        instance->m_Vertices[1] = Utils::Vector3Int2Float(v1);
+        instance->m_Vertices[2] = Utils::Vector3Int2Float(v2);
+        instance->DrawInterpolated(uvCoords, colors, textureWidth, textureHeight, lightIntensity);
     }
 } // namespace VSoftRenderer

@@ -66,8 +66,21 @@ int main()
 
     if (!ret)
     {
-        exit(1);
+        return -1;
     }
+
+    // Load a texture image from disk
+    auto textureImageData = raylib::Image("resources/textures/tga/african_head_diffuse.tga");
+    if (!textureImageData.IsReady())
+    {
+        std::cerr << "Failed to load texture!!!" << std::endl;
+        return -2;
+    }
+
+    int textureImageWidth  = textureImageData.width;
+    int textureImageHeight = textureImageData.height;
+
+    VSoftRenderer::Color* textureColors = (VSoftRenderer::Color*)LoadImageColors(textureImageData);
 
     VSoftRenderer::Vector3Float lightDirection(0, 0, -1);
 
@@ -86,36 +99,38 @@ int main()
                     auto fv = static_cast<size_t>(shapes[s].mesh.num_face_vertices[f]);
 
                     // Loop over vertices in the face.
-                    VSoftRenderer::Vector3Int* screenCoords = new VSoftRenderer::Vector3Int[fv];
-                    VSoftRenderer::Vector3Float * worldCoords = new VSoftRenderer::Vector3Float[fv];
-                    for (size_t v = 0; v < fv; v++)
+                    VSoftRenderer::Vector3Int   screenCoords[3];
+                    VSoftRenderer::Vector3Float worldCoords[3];
+                    VSoftRenderer::Vector2Float uvCoords[3];
+                    for (size_t vId = 0; vId < 3; vId++)
                     {
-                        auto index = shapes[s].mesh.indices[indexOffset + v];
+                        auto index = shapes[s].mesh.indices[indexOffset + vId];
 
                         float x = attrib.vertices[3*static_cast<size_t>(index.vertex_index)+0];
                         float y = attrib.vertices[3*static_cast<size_t>(index.vertex_index)+1];
                         float z = attrib.vertices[3*static_cast<size_t>(index.vertex_index)+2];
 
-                        worldCoords[v] = { x, y, z};
-                        screenCoords[v] = VSoftRenderer::Utils::World2Screen(worldCoords[v]);
+                        worldCoords[vId] = { x, y, z};
+                        screenCoords[vId] = VSoftRenderer::Utils::World2Screen(worldCoords[vId]);
+
+                        float u = attrib.texcoords[2*static_cast<size_t>(index.texcoord_index)+0];
+                        float v = attrib.texcoords[2*static_cast<size_t>(index.texcoord_index)+1];
+                        uvCoords[vId] = {u, v};
                     }
 
                     VSoftRenderer::Vector3Float normal = (worldCoords[2] - worldCoords[0]).CrossProduct(worldCoords[1] - worldCoords[0]).Normalized();
                     float intensity = normal * lightDirection;
                     if (intensity > 0)
                     {
-                        VSoftRenderer::Triangle3D::DrawFilled(screenCoords[0],
-                                                            screenCoords[1],
-                                                            screenCoords[2],
-                                                            {
-                                                                static_cast<unsigned char>(intensity * 255.0f),
-                                                                static_cast<unsigned char>(intensity * 255.0f),
-                                                                static_cast<unsigned char>(intensity * 255.0f),
-                                                                255});
+                        VSoftRenderer::Triangle3D::DrawInterpolated(screenCoords[0],
+                                                                    screenCoords[1],
+                                                                    screenCoords[2],
+                                                                    uvCoords,
+                                                                    textureColors,
+                                                                    textureImageWidth,
+                                                                    textureImageHeight,
+                                                                    intensity);
                     }
-
-                    delete[] screenCoords;
-                    delete[] worldCoords;
                     indexOffset += fv;
                 }
 

@@ -18,16 +18,15 @@ namespace VSoftRenderer
     {
     public:
         Triangle3D() = default;
-        Triangle3D(Vector3Float v0, Vector3Float v1, Vector3Float v2)
-        {
-            m_Vertices[0] = v0;
-            m_Vertices[1] = v1;
-            m_Vertices[2] = v2;
-        }
+        Triangle3D(const Vector3Float& v0, const Vector3Float& v1, const Vector3Float& v2);
+        Triangle3D(const Vector3Int& v0, const Vector3Int& v1, const Vector3Int& v2);
 
         void DrawWire(const Color& color);
         void DrawFilled(const Color& color) const;
         void DrawFilledSweeping(const Color& color);
+
+        // TODO: Refactor, extract Texture class and LightSource class.
+        void DrawInterpolated(const Vector2Float* uvCoords, const Color* colors, int textureWidth, int textureHeight, float lightIntensity);
 
         AABBFloat GetAABB() const;
         Vector3Float GetBarycentricCoordinates(const Vector3Float& p) const;
@@ -38,10 +37,15 @@ namespace VSoftRenderer
         static void DrawFilled(const Vector3Float& v0, const Vector3Float& v1, const Vector3Float& v2, const Color& color);
         static void DrawFilledSweeping(const Vector3Float& v0, const Vector3Float& v1, const Vector3Float& v2, const Color& color);
 
+        // TODO: Refactor, extract Texture class and LightSource class.
+        static void DrawInterpolated(const Vector3Float& v0, const Vector3Float& v1, const Vector3Float& v2, const Vector2Float* uvCoords, const Color* colors, int textureWidth, int textureHeight, float lightIntensity);
+
         static void DrawWire(const Vector3Int & v0, const Vector3Int& v1, const Vector3Int& v2, const Color& color);
         static void DrawFilled(const Vector3Int& v0, const Vector3Int& v1, const Vector3Int& v2, const Color& color);
         static void DrawFilledSweeping(const Vector3Int& v0, const Vector3Int& v1, const Vector3Int& v2, const Color& color);
 
+        // TODO: Refactor, extract Texture class and LightSource class.
+        static void DrawInterpolated(const Vector3Int& v0, const Vector3Int& v1, const Vector3Int& v2, const Vector2Float* uvCoords, const Color* colors, int textureWidth, int textureHeight, float lightIntensity);
     private:
         Vector3Float m_Vertices[3];
 
