@@ -78,7 +78,7 @@ namespace VSoftRenderer
         instance->Draw(color);
     }
 
-    void Line::Draw(Vector2Int p0, Vector2Int p1, const Color& color)
+    void Line::Draw(const Vector2Int& p0, const Vector2Int& p1, const Color& color)
     {
         auto& instance = GetInstance();
         instance->m_P0 = p0;

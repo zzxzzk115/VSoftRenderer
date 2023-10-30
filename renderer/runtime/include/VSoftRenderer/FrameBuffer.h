@@ -8,6 +8,8 @@
 
 #include "VSoftRenderer/Pixel.h"
 #include "VSoftRenderer/RenderConfig.h"
+
+#include <limits>
 #include <stdexcept>
 
 namespace VSoftRenderer
@@ -15,16 +17,40 @@ namespace VSoftRenderer
     class FrameBuffer
     {
     public:
-        FrameBuffer() = default;
         FrameBuffer(int width, int height, Pixel* data)
-            : m_Width(width), m_Height(height), m_PixelData(data) {}
+            : m_Width(width), m_Height(height),
+              m_PixelData(data)
+        {
+            m_ZBuffer = new float [width * height];
+            for (int i = 0; i < width * height; ++i)
+            {
+                m_ZBuffer[i] = -std::numeric_limits<float>::max();
+            }
+        }
         explicit FrameBuffer(Vector2Int size)
-            : m_Width(size.X), m_Height(size.Y), m_PixelData(new Pixel[size.X * size.Y]) {}
-        ~FrameBuffer() { delete[] m_PixelData; m_PixelData = nullptr; }
+            : m_Width(size.X), m_Height(size.Y),
+              m_PixelData(new Pixel[size.X * size.Y])
+        {
+            m_ZBuffer = new float [size.X * size.Y];
+            for (int i = 0; i < size.X * size.Y; ++i)
+            {
+                m_ZBuffer[i] = -std::numeric_limits<float>::max();
+            }
+        }
+
+        ~FrameBuffer()
+        {
+            delete[] m_PixelData;
+            delete[] m_ZBuffer;
+
+            m_PixelData = nullptr;
+            m_ZBuffer = nullptr;
+        }
 
         void SetSize(int width, int height)
         {
             m_PixelData = new Pixel[width * height];
+            m_ZBuffer = new float[width * height];
         }
 
         int GetWidth() const { return m_Width; }
@@ -49,6 +75,24 @@ namespace VSoftRenderer
             m_PixelData[y * m_Width + x].PixelColor = color;
         }
 
+        inline float GetZBufferValue(int x, int y) const
+        {
+            if (x < 0 || x > m_Width || y < 0 || y > m_Height)
+            {
+                throw std::runtime_error("Error: Out of range!");
+            }
+            return m_ZBuffer[y * m_Width + x];
+        }
+
+        inline void SetZBufferValue(int x, int y, float zValue)
+        {
+            if (x < 0 || x > m_Width || y < 0 || y > m_Height)
+            {
+                throw std::runtime_error("Error: Out of range!");
+            }
+            m_ZBuffer[y * m_Width + x] = zValue;
+        }
+
         static FrameBuffer* GetInstance()
         {
             if (s_Instance == nullptr)
@@ -62,6 +106,7 @@ namespace VSoftRenderer
         int    m_Width;
         int    m_Height;
         Pixel* m_PixelData;
+        float* m_ZBuffer;
 
         static FrameBuffer* s_Instance;
     };

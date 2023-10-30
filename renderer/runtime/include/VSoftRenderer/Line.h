@@ -7,7 +7,7 @@
 #pragma once
 
 #include "VSoftRenderer/Color.h"
-#include "VSoftRenderer/Vector2Int.h"
+#include "VSoftRenderer/Vector2.h"
 
 #include <memory>
 
@@ -24,7 +24,7 @@ namespace VSoftRenderer
 
         static std::shared_ptr<Line>& GetInstance();
         static void Draw(int x0, int y0, int x1, int y1, const Color& color);
-        static void Draw(Vector2Int p0, Vector2Int p1, const Color& color);
+        static void Draw(const Vector2Int& p0, const Vector2Int& p1, const Color& color);
 
     private:
         Vector2Int m_P0;

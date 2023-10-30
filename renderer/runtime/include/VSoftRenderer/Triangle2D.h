@@ -6,10 +6,10 @@
 
 #pragma once
 
-#include "VSoftRenderer/Color.h"
-#include "VSoftRenderer/Vector2Int.h"
-#include "VSoftRenderer/Vector3.h"
 #include "VSoftRenderer/AABB.h"
+#include "VSoftRenderer/Color.h"
+#include "VSoftRenderer/Vector2.h"
+#include "VSoftRenderer/Vector3.h"
 
 #include <memory>
 
@@ -30,14 +30,14 @@ namespace VSoftRenderer
         void DrawFilled(const Color& color) const;
         void DrawFilledSweeping(const Color& color);
 
-        AABB    GetAABB() const;
-        Vector3 GetBarycentricCoordinates(Vector2Int p) const;
+        AABBInt GetAABB() const;
+        Vector3Float GetBarycentricCoordinates(const Vector2Int& p) const;
 
         static std::shared_ptr<Triangle2D>& GetInstance();
 
-        static void DrawWire(Vector2Int v0, Vector2Int v1, Vector2Int v2, const Color& color);
-        static void DrawFilled(Vector2Int v0, Vector2Int v1, Vector2Int v2, const Color& color);
-        static void DrawFilledSweeping(Vector2Int v0, Vector2Int v1, Vector2Int v2, const Color& color);
+        static void DrawWire(const Vector2Int& v0, const Vector2Int& v1, const Vector2Int& v2, const Color& color);
+        static void DrawFilled(const Vector2Int& v0, const Vector2Int& v1, const Vector2Int& v2, const Color& color);
+        static void DrawFilledSweeping(const Vector2Int& v0, const Vector2Int& v1, const Vector2Int& v2, const Color& color);
 
     private:
         Vector2Int m_Vertices[3];

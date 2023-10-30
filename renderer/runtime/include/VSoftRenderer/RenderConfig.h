@@ -6,7 +6,7 @@
 
 #pragma once
 
-#include "VSoftRenderer/Vector2Int.h"
+#include "VSoftRenderer/Vector2.h"
 
 namespace VSoftRenderer
 {

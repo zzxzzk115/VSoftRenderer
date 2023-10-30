@@ -4,10 +4,10 @@
 // Created or modified by Kexuan Zhang on 2023/10/28 16:07.
 //
 
+#include "VSoftRenderer/Triangle2D.h"
 #include "VSoftRenderer/FrameBuffer.h"
 #include "VSoftRenderer/Line.h"
 #include "VSoftRenderer/RenderConfig.h"
-#include "VSoftRenderer/Triangle2D.h"
 
 #include <algorithm>
 
@@ -80,11 +80,11 @@ namespace VSoftRenderer
         }
     }
 
-    AABB Triangle2D::GetAABB() const
+    AABBInt Triangle2D::GetAABB() const
     {
         const auto& frameBufferSize = RenderConfig::GetFrameBufferSize();
-        AABB aabb;
-        Vector2Int clamp = {frameBufferSize.X - 1, frameBufferSize.Y - 1};
+        AABBInt     aabb;
+        Vector2Int     clamp = {frameBufferSize.X - 1, frameBufferSize.Y - 1};
         aabb.SetMin(clamp);
         aabb.SetMax({0, 0});
 
@@ -102,18 +102,18 @@ namespace VSoftRenderer
         return aabb;
     }
 
-    Vector3 Triangle2D::GetBarycentricCoordinates(Vector2Int p) const
+    Vector3Float Triangle2D::GetBarycentricCoordinates(const Vector2Int& p) const
     {
-        Vector2Int PA(m_Vertices[0].X - p.X, m_Vertices[0].Y - p.Y);
-        Vector2Int AB(m_Vertices[1].X - m_Vertices[0].X, m_Vertices[1].Y - m_Vertices[0].Y);
-        Vector2Int AC(m_Vertices[2].X - m_Vertices[0].X, m_Vertices[2].Y - m_Vertices[0].Y);
+        Vector2Int PA = m_Vertices[0] - p;
+        Vector2Int AB = m_Vertices[1] - m_Vertices[0];
+        Vector2Int AC = m_Vertices[2] - m_Vertices[0];
 
-        Vector3 u = Vector3(AC.X, AB.X, PA.X).CrossProduct(Vector3(AC.Y, AB.Y, PA.Y));
+        Vector3Float u = Vector3Float(AC.X, AB.X, PA.X).CrossProduct(Vector3Float(AC.Y, AB.Y, PA.Y));
 
         // degenerate triangle
         if (std::abs(u.Z) < 1)
         {
-            return Vector3(-1, 1, 1);
+            return Vector3Float(-1, 1, 1);
         }
 
         float alpha = 1.0f - (u.X + u.Y) / u.Z;
@@ -134,7 +134,7 @@ namespace VSoftRenderer
         return s_Instance;
     }
 
-    void Triangle2D::DrawWire(Vector2Int v0, Vector2Int v1, Vector2Int v2, const Color& color)
+    void Triangle2D::DrawWire(const Vector2Int& v0, const Vector2Int& v1, const Vector2Int& v2, const Color& color)
     {
         auto& instance = GetInstance();
         instance->m_Vertices[0] = v0;
@@ -143,7 +143,7 @@ namespace VSoftRenderer
         instance->DrawWire(color);
     }
 
-    void Triangle2D::DrawFilled(Vector2Int v0, Vector2Int v1, Vector2Int v2, const Color& color)
+    void Triangle2D::DrawFilled(const Vector2Int& v0, const Vector2Int& v1, const Vector2Int& v2, const Color& color)
     {
         auto& instance = GetInstance();
         instance->m_Vertices[0] = v0;
@@ -152,7 +152,7 @@ namespace VSoftRenderer
         instance->DrawFilled(color);
     }
     
-    void Triangle2D::DrawFilledSweeping(Vector2Int v0, Vector2Int v1, Vector2Int v2, const Color& color)
+    void Triangle2D::DrawFilledSweeping(const Vector2Int& v0, const Vector2Int& v1, const Vector2Int& v2, const Color& color)
     {
         auto& instance = GetInstance();
         instance->m_Vertices[0] = v0;

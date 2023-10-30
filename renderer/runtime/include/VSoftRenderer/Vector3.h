@@ -6,75 +6,83 @@
 
 #pragma once
 
+#include "VSoftRenderer/Vector2.h"
+
 #include <cmath>
 #include <stdexcept>
 
 namespace VSoftRenderer
 {
+    template <typename T>
     struct Vector3
     {
-        float X;
-        float Y;
-        float Z;
+        T X;
+        T Y;
+        T Z;
 
-        Vector3() : X(0.0f), Y(0.0f), Z(0.0f) {}
-        Vector3(float x, float y, float z) : X(x), Y(y), Z(z) {}
-        explicit Vector3(const Vector2Int& v) : X(v.X), Y(v.Y) {}
+        Vector3() : X(0), Y(0), Z(0) {}
+        Vector3(T x, T y, T z) : X(x), Y(y), Z(z) {}
+        explicit Vector3(const Vector2<T>& v) : X(static_cast<T>(v.X)), Y(static_cast<T>(v.Y)), Z(static_cast<T>(0)) {}
 
-        Vector2Int DiscardZ() const
+        Vector2Int DiscardZInt() const
         {
-            return {static_cast<int>(X), static_cast<int>(Y)};
+            return Vector2Int(X, Y);
+        }
+
+        Vector2Float DiscardZFloat() const
+        {
+            return Vector2Float(X, Y);
         }
 
         Vector3 operator + (const Vector3& other) const
         {
-            return { X + other.X, Y + other.Y, Z + other.Z};
+            return Vector3(X + other.X, Y + other.Y, Z + other.Z);
         }
 
         Vector3 operator - (const Vector3& other) const
         {
-            return { X - other.X, Y - other.Y, Z - other.Z};
+            return Vector3(X - other.X, Y - other.Y, Z - other.Z);
         }
 
-        Vector3 operator * (float scalar) const
+        Vector3 operator * (T scalar) const
         {
-            return { X * scalar, Y * scalar, Z * scalar};
+            return Vector3(X * scalar, Y * scalar, Z * scalar);
         }
 
-        float operator * (const Vector3& other) const
+        T operator * (const Vector3& other) const
         {
             return DotProduct(other);
         }
 
-        Vector3 operator / (float scalar) const
+        Vector3 operator / (T scalar) const
         {
-            if (std::abs(scalar) < 1e-6)
+            if (std::abs(scalar) < static_cast<T>(1e-6))
             {
                 throw std::runtime_error("Divided by Zero!!!");
             }
 
-            return { X / scalar, Y / scalar, Z / scalar};
+            return Vector3(X / scalar, Y / scalar, Z / scalar);
         }
 
-        float GetLength() const
+        T GetLength() const
         {
             return std::sqrt(X * X + Y * Y + Z * Z);
         }
 
-        float DotProduct(const Vector3& other) const
+        T DotProduct(const Vector3& other) const
         {
             return X * other.X + Y * other.Y + Z * other.Z;
         }
 
         Vector3 CrossProduct(const Vector3& other) const
         {
-            return {Y * other.Z - Z * other.Y, Z * other.X - X * other.Z, X * other.Y - Y * other.X };
+            return Vector3(Y * other.Z - Z * other.Y, Z * other.X - X * other.Z, X * other.Y - Y * other.X);
         }
 
         void Normalize()
         {
-            float length = GetLength();
-            if (length < 1e-6)
+            T length = GetLength();
+            if (length < static_cast<T>(1e-6))
             {
                 return;
             }
@@ -86,13 +94,16 @@ namespace VSoftRenderer
 
         Vector3 Normalized() const
         {
-            float length = GetLength();
-            if (length < 1e-6)
+            T length = GetLength();
+            if (length < static_cast<T>(1e-6))
             {
-                return {X, Y, Z};
+                return Vector3(X, Y, Z);
             }
 
-            return { X / length, Y / length, Z / length};
+            return Vector3(X / length, Y / length, Z / length);
         }
     };
+
+    using Vector3Int = Vector3<int>;
+    using Vector3Float = Vector3<float>;
 } // namespace VSoftRenderer

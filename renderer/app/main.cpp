@@ -7,7 +7,8 @@
 #include "VSoftRenderer/FrameBuffer.h"
 #include "VSoftRenderer/Line.h"
 #include "VSoftRenderer/RenderConfig.h"
-#include "VSoftRenderer/Triangle2D.h"
+#include "VSoftRenderer/Triangle3D.h"
+#include "VSoftRenderer/Utils.h"
 
 #include <raylib-cpp.hpp>
 
@@ -68,7 +69,7 @@ int main()
         exit(1);
     }
 
-    VSoftRenderer::Vector3 lightDirection(0, 0, -1);
+    VSoftRenderer::Vector3Float lightDirection(0, 0, -1);
 
     while (!window.ShouldClose())
     {
@@ -85,8 +86,8 @@ int main()
                     auto fv = static_cast<size_t>(shapes[s].mesh.num_face_vertices[f]);
 
                     // Loop over vertices in the face.
-                    VSoftRenderer::Vector2Int* screenCoords = new VSoftRenderer::Vector2Int[fv];
-                    VSoftRenderer::Vector3* worldCoords = new VSoftRenderer::Vector3[fv];
+                    VSoftRenderer::Vector3Int* screenCoords = new VSoftRenderer::Vector3Int[fv];
+                    VSoftRenderer::Vector3Float * worldCoords = new VSoftRenderer::Vector3Float[fv];
                     for (size_t v = 0; v < fv; v++)
                     {
                         auto index = shapes[s].mesh.indices[indexOffset + v];
@@ -95,15 +96,15 @@ int main()
                         float y = attrib.vertices[3*static_cast<size_t>(index.vertex_index)+1];
                         float z = attrib.vertices[3*static_cast<size_t>(index.vertex_index)+2];
 
-                        screenCoords[v] = {static_cast<int>((x+1.0f)*ScreenWidth/2.0f), static_cast<int>((y+1.0f)*ScreenHeight/2.0f)};
-                        worldCoords[v] = {x, y, z};
+                        worldCoords[v] = { x, y, z};
+                        screenCoords[v] = VSoftRenderer::Utils::World2Screen(worldCoords[v]);
                     }
 
-                    VSoftRenderer::Vector3 normal = (worldCoords[2] - worldCoords[0]).CrossProduct(worldCoords[1] - worldCoords[0]).Normalized();
+                    VSoftRenderer::Vector3Float normal = (worldCoords[2] - worldCoords[0]).CrossProduct(worldCoords[1] - worldCoords[0]).Normalized();
                     float intensity = normal * lightDirection;
                     if (intensity > 0)
                     {
-                        VSoftRenderer::Triangle2D::DrawFilled(screenCoords[0],
+                        VSoftRenderer::Triangle3D::DrawFilled(screenCoords[0],
                                                             screenCoords[1],
                                                             screenCoords[2],
                                                             {
