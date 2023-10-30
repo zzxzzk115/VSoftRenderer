@@ -9,7 +9,8 @@ add_library(${TARGET_NAME} src/Line.cpp
         src/RenderConfig.cpp
         src/FrameBuffer.cpp
         src/Triangle3D.cpp
-        src/Utils.cpp)
+        src/Utils.cpp
+)
 
 set_target_properties(${TARGET_NAME} PROPERTIES CXX_STANDARD 17)
 set_target_properties(${TARGET_NAME} PROPERTIES FOLDER "Runtime")

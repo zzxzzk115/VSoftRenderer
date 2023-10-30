@@ -16,11 +16,11 @@ namespace VSoftRenderer
     public:
         AABB() : m_Min(), m_Max() {}
 
-        void SetMin(const T& min) { m_Min = min; }
-        void SetMax(const T& max) { m_Max = max; }
+        inline void SetMin(const T& min) { m_Min = min; }
+        inline void SetMax(const T& max) { m_Max = max; }
 
-        const T& GetMin() const { return m_Min; }
-        const T& GetMax() const { return m_Max; }
+        inline const T& GetMin() const { return m_Min; }
+        inline const T& GetMax() const { return m_Max; }
 
     private:
         T m_Min;

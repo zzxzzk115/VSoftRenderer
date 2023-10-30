@@ -55,6 +55,7 @@ namespace VSoftRenderer
 
         int GetWidth() const { return m_Width; }
         int GetHeight() const { return m_Height; }
+
         Vector2Int GetSize() const { return {m_Width, m_Height}; }
 
         inline Pixel GetPixel(int x, int y) const

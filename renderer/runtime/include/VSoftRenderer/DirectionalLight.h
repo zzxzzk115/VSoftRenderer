@@ -14,6 +14,7 @@ namespace VSoftRenderer
     {
     public:
         explicit DirectionalLight(Vector3Float direction) : m_Direction(direction) {}
+
         inline Vector3Float GetDirection() const { return m_Direction; }
 
     private:
