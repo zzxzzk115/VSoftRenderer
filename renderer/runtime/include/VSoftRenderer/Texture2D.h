@@ -16,26 +16,15 @@ namespace VSoftRenderer
         Texture2D(int width, int height, Color* data)
             : m_Width(width), m_Height(height), m_Data(data) {}
 
-        ~Texture2D()
-        {
-            delete[] m_Data;
-            m_Data = nullptr;
-        }
+        ~Texture2D();
 
         inline int GetWidth() const { return m_Width; }
         inline int GetHeight() const { return m_Height; }
 
         inline const Color* GetData() { return m_Data; }
-        inline Color GetColorAt(float u, float v) const
-        {
-            int x = static_cast<int>(u * m_Width);
-            int y = static_cast<int>((1.0f - v) * m_Height);
-            return GetColorAt(x, y);
-        }
-        inline Color GetColorAt(int x, int y) const
-        {
-            return m_Data[y * m_Width + x];
-        }
+
+        Color GetColorAt(float u, float v) const;
+        Color GetColorAt(int x, int y) const;
 
     private:
         int    m_Width;

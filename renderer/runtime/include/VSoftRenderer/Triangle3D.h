@@ -42,6 +42,7 @@ namespace VSoftRenderer
         static void DrawFilled(const Vector3Int& v0, const Vector3Int& v1, const Vector3Int& v2, const Color& color);
         static void DrawFilledSweeping(const Vector3Int& v0, const Vector3Int& v1, const Vector3Int& v2, const Color& color);
         static void DrawInterpolated(const Vector3Int& v0, const Vector3Int& v1, const Vector3Int& v2, const Vector2Float* uvCoords, const Texture2D& texture, float intensity);
+
     private:
         Vector3Float m_Vertices[3];
 

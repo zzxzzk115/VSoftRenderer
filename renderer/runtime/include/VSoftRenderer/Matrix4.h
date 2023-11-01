@@ -15,28 +15,11 @@ namespace VSoftRenderer
     public:
         Matrix4() = default;
 
-        std::vector<float>& operator [] (const int i)
-        {
-            return m_Matrix[i];
-        }
+        std::vector<float>& operator [] (int i);
 
-        void SetIdentity()
-        {
-            for (int i = 0; i < 4; ++i)
-            {
-                for (int j = 0; j < 4; ++j)
-                {
-                    m_Matrix[i][j] = i==j ? 1 : 0;
-                }
-            }
-        }
+        void SetIdentity();
 
-        static Matrix4 Identity()
-        {
-            Matrix4 result;
-            result.SetIdentity();
-            return result;
-        }
+        static Matrix4 Identity();
 
     private:
         std::vector<std::vector<float>> m_Matrix;

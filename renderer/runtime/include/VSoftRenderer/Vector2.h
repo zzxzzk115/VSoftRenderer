@@ -6,7 +6,6 @@
 
 #pragma once
 
-
 namespace VSoftRenderer
 {
     template <typename T>
