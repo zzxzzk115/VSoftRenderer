@@ -7,7 +7,7 @@
 #pragma once
 
 #include "VSoftRenderer/Pixel.h"
-#include "VSoftRenderer/RenderConfig.h"
+#include "VSoftRenderer/Vector2.h"
 
 #include <limits>
 #include <stdexcept>
@@ -21,6 +21,8 @@ namespace VSoftRenderer
         explicit FrameBuffer(Vector2Int size);
 
         ~FrameBuffer();
+
+        void Clear(const Color& clearColor);
 
         void SetSize(int width, int height);
 

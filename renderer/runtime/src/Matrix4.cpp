@@ -10,11 +10,7 @@ namespace VSoftRenderer
 {
     Matrix4::Matrix4()
     {
-        m_Matrix.resize(4);
-        for (int row = 0; row < 4; ++row)
-        {
-            m_Matrix[row].resize(4);
-        }
+        m_Matrix = std::vector<std::vector<float>>(4, std::vector<float>(4, 0));
     }
 
     std::vector<float>& Matrix4::operator[](int i)
@@ -105,27 +101,18 @@ namespace VSoftRenderer
         return matrix4;
     }
 
-    template<typename T>
-    Vector4<T> Matrix4::operator*(const Vector4<T>& other) const
+    std::ostream& operator << (std::ostream& s, Matrix4& m)
     {
-        Vector4<T> productVector;
-
-        for (int row = 0; row < 4; row++)
+        for (int row = 0; row <  4; ++row)
         {
             for (int col = 0; col < 4; col++)
             {
-                productVector[row] += m_Matrix[row][col] * other[col];
+                s << m[row][col];
+                if (col < 3) s << "\t";
             }
+            s << std::endl;
         }
-
-        return productVector;
-    }
-
-    template<typename T>
-    Vector3<T> Matrix4::operator * (const Vector3<T>& other) const
-    {
-        Vector4<T> productVector = (*this) * Vector4(other);
-        return productVector.ToPoint3();
+        return s;
     }
 
     void Matrix4::SetIdentity()

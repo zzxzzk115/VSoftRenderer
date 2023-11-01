@@ -7,7 +7,6 @@
 #include "VSoftRenderer/Triangle3D.h"
 #include "VSoftRenderer/FrameBuffer.h"
 #include "VSoftRenderer/Line.h"
-#include "VSoftRenderer/RenderConfig.h"
 #include "VSoftRenderer/Utils.h"
 
 #include <algorithm>
@@ -147,7 +146,7 @@ namespace VSoftRenderer
 
     AABBFloat Triangle3D::GetAABB() const
     {
-        const auto& frameBufferSize = RenderConfig::GetFrameBufferSize();
+        const auto& frameBufferSize = FrameBuffer::GetInstance()->GetSize();
         AABBFloat     aabb;
         Vector2Float  clamp = {static_cast<float>(frameBufferSize.X - 1), static_cast<float>(frameBufferSize.Y - 1)};
         aabb.SetMin(clamp);

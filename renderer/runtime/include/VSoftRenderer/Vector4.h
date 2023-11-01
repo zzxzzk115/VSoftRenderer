@@ -7,6 +7,7 @@
 #pragma once
 
 #include <stdexcept>
+#include <iostream>
 
 namespace VSoftRenderer
 {
@@ -18,7 +19,7 @@ namespace VSoftRenderer
         T Z;
         T W;
 
-        Vector4() : X(0), Y(0), Z(0), W(1) {}
+        Vector4() : X(0), Y(0), Z(0), W(0) {}
         Vector4(T x, T y, T z, T w) : X(x), Y(y), Z(z), W(w) {}
         explicit Vector4(const Vector3<T>& v) : X(v.X), Y(v.Y), Z(v.Z), W(1) {}
 
@@ -55,10 +56,17 @@ namespace VSoftRenderer
             throw std::out_of_range("Index out of range");
         }
 
-        inline Vector3<T> ToVector3() const { Vector3(X, Y, Z);}
-        inline Vector3<T> ToPoint3() const {Vector3(X / W, Y / W, Z / W);}
+        inline Vector3<T> ToVector3() const { return Vector3(X, Y, Z);}
+        inline Vector3<T> ToPoint3() const { return Vector3(X / W, Y / W, Z / W);}
     };
 
     using Vector4Int = Vector4<int>;
     using Vector4Float = Vector4<float>;
+
+    template <typename T>
+    std::ostream& operator << (std::ostream& s, Vector4<T>& v)
+    {
+        s << "(" << v.X << ", " << v.Y << ", " << v.Z << ", " << v.W << ")" << std::endl;
+        return s;
+    }
 } // namespace VSoftRenderer

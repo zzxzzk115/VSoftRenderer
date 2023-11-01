@@ -9,6 +9,7 @@
 #include "VSoftRenderer/Vector3.h"
 #include "VSoftRenderer/Vector4.h"
 
+#include <iostream>
 #include <vector>
 
 namespace VSoftRenderer
@@ -25,11 +26,30 @@ namespace VSoftRenderer
         Matrix4 operator * (float scalar) const;
         Matrix4 operator / (float scalar) const;
 
-        template<typename T>
-        Vector4<T> operator * (const Vector4<T>& other) const;
+        friend std::ostream& operator << (std::ostream& s, Matrix4& m);
 
         template<typename T>
-        Vector3<T> operator * (const Vector3<T>& other) const;
+        Vector4<T> operator * (const Vector4<T>& other) const
+        {
+            Vector4<T> productVector;
+
+            for (int row = 0; row < 4; row++)
+            {
+                for (int col = 0; col < 4; col++)
+                {
+                    productVector[row] += m_Matrix[row][col] * other[col];
+                }
+            }
+
+            return productVector;
+        }
+
+        template<typename T>
+        Vector3<T> operator * (const Vector3<T>& other) const
+        {
+            Vector4<T> productVector = (*this) * Vector4(other);
+            return productVector.ToPoint3();
+        }
 
         void SetIdentity();
         Matrix4 Transpose() const;

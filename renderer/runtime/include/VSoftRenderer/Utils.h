@@ -13,9 +13,9 @@ namespace VSoftRenderer
     class Utils
     {
     public:
-        static Vector3Int   World2Screen(const Vector3Float& v);
-        static Vector3Float World2ScreenFloat(const Vector3Float& v);
         static Vector3Float Vector3Int2Float(const Vector3Int& v);
         static Vector2Float Vector2Int2Float(const Vector2Int& v);
+        static Vector3Int   Vector3Float2Int(const Vector3Float& v);
+        static Vector2Int   Vector2Float2Int(const Vector2Float& v);
     };
 } // namespace VSoftRenderer

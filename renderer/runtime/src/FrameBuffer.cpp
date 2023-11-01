@@ -5,6 +5,7 @@
 //
 
 #include "VSoftRenderer/FrameBuffer.h"
+#include "VSoftRenderer/VGL.h"
 
 namespace VSoftRenderer
 {
@@ -41,8 +42,19 @@ namespace VSoftRenderer
         m_ZBuffer = nullptr;
     }
 
+    void FrameBuffer::Clear(const Color& clearColor)
+    {
+        for (int i = 0; i < m_Width * m_Height; ++i)
+        {
+            m_PixelData[i].PixelColor = clearColor;
+        }
+    }
+
     void FrameBuffer::SetSize(int width, int height)
     {
+        m_Width = width;
+        m_Height = height;
+
         m_PixelData = new Pixel[width * height];
         m_ZBuffer = new float[width * height];
     }
@@ -87,7 +99,7 @@ namespace VSoftRenderer
     {
         if (s_Instance == nullptr)
         {
-            s_Instance = new FrameBuffer(RenderConfig::GetFrameBufferSize());
+            s_Instance = new FrameBuffer({600, 600});
         }
         return s_Instance;
     }

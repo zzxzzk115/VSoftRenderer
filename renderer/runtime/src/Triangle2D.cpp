@@ -7,7 +7,6 @@
 #include "VSoftRenderer/Triangle2D.h"
 #include "VSoftRenderer/FrameBuffer.h"
 #include "VSoftRenderer/Line.h"
-#include "VSoftRenderer/RenderConfig.h"
 
 #include <algorithm>
 
@@ -82,7 +81,7 @@ namespace VSoftRenderer
 
     AABBInt Triangle2D::GetAABB() const
     {
-        const auto& frameBufferSize = RenderConfig::GetFrameBufferSize();
+        const auto& frameBufferSize = FrameBuffer::GetInstance()->GetSize();
         AABBInt     aabb;
         Vector2Int     clamp = {frameBufferSize.X - 1, frameBufferSize.Y - 1};
         aabb.SetMin(clamp);

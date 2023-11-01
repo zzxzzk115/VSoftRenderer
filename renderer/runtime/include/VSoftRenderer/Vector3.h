@@ -8,6 +8,7 @@
 
 #include "VSoftRenderer/Vector2.h"
 
+#include <iostream>
 #include <cmath>
 #include <stdexcept>
 
@@ -57,7 +58,7 @@ namespace VSoftRenderer
 
         Vector3 operator / (T scalar) const
         {
-            if (std::abs(scalar) < static_cast<T>(1e-6))
+            if (std::abs(scalar) < 1e-6)
             {
                 throw std::runtime_error("Divided by Zero!!!");
             }
@@ -83,7 +84,7 @@ namespace VSoftRenderer
         void Normalize()
         {
             T length = GetLength();
-            if (length < static_cast<T>(1e-6))
+            if (length < 1e-6)
             {
                 return;
             }
@@ -96,15 +97,38 @@ namespace VSoftRenderer
         Vector3 Normalized() const
         {
             T length = GetLength();
-            if (length < static_cast<T>(1e-6))
+            if (length < 1e-6)
             {
                 return Vector3(X, Y, Z);
             }
 
             return Vector3(X / length, Y / length, Z / length);
         }
+
+        T& operator[] (size_t index)
+        {
+            if (index == 0) return X;
+            else if (index == 1) return Y;
+            else if (index == 2) return Z;
+            throw std::out_of_range("Index out of range");
+        }
+
+        const T& operator[] (size_t index) const
+        {
+            if (index == 0) return X;
+            else if (index == 1) return Y;
+            else if (index == 2) return Z;
+            throw std::out_of_range("Index out of range");
+        }
     };
 
     using Vector3Int = Vector3<int>;
     using Vector3Float = Vector3<float>;
+
+    template <typename T>
+    std::ostream& operator << (std::ostream& s, Vector3<T>& v)
+    {
+        s << "(" << v.X << ", " << v.Y << ", " << v.Z << ")" << std::endl;
+        return s;
+    }
 } // namespace VSoftRenderer

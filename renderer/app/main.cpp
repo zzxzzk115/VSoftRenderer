@@ -6,11 +6,11 @@
 
 #include "VSoftRenderer/DirectionalLight.h"
 #include "VSoftRenderer/FrameBuffer.h"
-#include "VSoftRenderer/Line.h"
-#include "VSoftRenderer/RenderConfig.h"
+#include "VSoftRenderer/Matrix4.h"
 #include "VSoftRenderer/Texture2D.h"
 #include "VSoftRenderer/Triangle3D.h"
 #include "VSoftRenderer/Utils.h"
+#include "VSoftRenderer/VGL.h"
 
 #include <raylib-cpp.hpp>
 
@@ -42,8 +42,6 @@ int main()
     raylib::Texture targetTexture(renderTexture.GetTexture());
 
     SetTargetFPS(60);
-
-    VSoftRenderer::RenderConfig::SetFrameBufferSize({ScreenWidth, ScreenHeight});
 
     // Load a model from disk by using tinyobjloader
     std::string inputFile = "resources/models/obj/african_head.obj";
@@ -86,57 +84,69 @@ int main()
 
     VSoftRenderer::DirectionalLight light({0, 0, -1});
 
+    VSoftRenderer::glViewPort(0, 0, ScreenWidth, ScreenHeight);
+
+    VSoftRenderer::glClearColor({50, 50, 50, 255});
+    VSoftRenderer::glClear();
+
+    // Camera parameters
+    VSoftRenderer::Vector3Float eye(1 , 1, 3);
+    VSoftRenderer::Vector3Float center(0 , 0, 0);
+    VSoftRenderer::Vector3Float up(0 , 1, 0);
+
+    VSoftRenderer::Matrix4 modelMatrix = VSoftRenderer::Matrix4::Identity();
+    VSoftRenderer::Matrix4 viewMatrix = VSoftRenderer::glLookAt(eye, center, up);
+    VSoftRenderer::Matrix4 projectionMatrix = VSoftRenderer::glProjection(eye, center);
+
+    VSoftRenderer::Matrix4 modelViewProjectionViewportMatrix = VSoftRenderer::g_vglState.ViewportMatrix * projectionMatrix * viewMatrix * modelMatrix;
+
+    // Flat Shading Renderer
+    // Loop over shapes
+    for (size_t s = 0; s < shapes.size(); s++)
+    {
+        // Loop over faces(polygon)
+        size_t indexOffset = 0;
+        for (size_t f = 0; f < shapes[s].mesh.num_face_vertices.size(); f++)
+        {
+            auto fv = static_cast<size_t>(shapes[s].mesh.num_face_vertices[f]);
+
+            // Loop over vertices in the face.
+            VSoftRenderer::Vector3Int   screenCoords[3];
+            VSoftRenderer::Vector3Float worldCoords[3];
+            VSoftRenderer::Vector2Float uvCoords[3];
+            for (size_t vId = 0; vId < 3; vId++)
+            {
+                auto index = shapes[s].mesh.indices[indexOffset + vId];
+
+                float x = attrib.vertices[3*static_cast<size_t>(index.vertex_index)+0];
+                float y = attrib.vertices[3*static_cast<size_t>(index.vertex_index)+1];
+                float z = attrib.vertices[3*static_cast<size_t>(index.vertex_index)+2];
+
+                worldCoords[vId] = { x, y, z };
+                screenCoords[vId] = VSoftRenderer::Utils::Vector3Float2Int(modelViewProjectionViewportMatrix * worldCoords[vId]);
+
+                float u = attrib.texcoords[2*static_cast<size_t>(index.texcoord_index)+0];
+                float v = attrib.texcoords[2*static_cast<size_t>(index.texcoord_index)+1];
+                uvCoords[vId] = {u, v};
+            }
+
+            VSoftRenderer::Vector3Float normal = (worldCoords[2] - worldCoords[0]).CrossProduct(worldCoords[1] - worldCoords[0]).Normalized();
+            float intensity = normal * light.GetDirection();
+            intensity = std::max(0.0f, intensity);
+            VSoftRenderer::Triangle3D::DrawInterpolated(screenCoords[0],
+                                                        screenCoords[1],
+                                                        screenCoords[2],
+                                                        uvCoords,
+                                                        texture,
+                                                        intensity);
+            indexOffset += fv;
+        }
+
+    }
+
     while (!window.ShouldClose())
     {
         renderTexture.BeginMode();
-
-            // Flat Shading Renderer
-            // Loop over shapes
-            for (size_t s = 0; s < shapes.size(); s++)
-            {
-                // Loop over faces(polygon)
-                size_t indexOffset = 0;
-                for (size_t f = 0; f < shapes[s].mesh.num_face_vertices.size(); f++)
-                {
-                    auto fv = static_cast<size_t>(shapes[s].mesh.num_face_vertices[f]);
-
-                    // Loop over vertices in the face.
-                    VSoftRenderer::Vector3Int   screenCoords[3];
-                    VSoftRenderer::Vector3Float worldCoords[3];
-                    VSoftRenderer::Vector2Float uvCoords[3];
-                    for (size_t vId = 0; vId < 3; vId++)
-                    {
-                        auto index = shapes[s].mesh.indices[indexOffset + vId];
-
-                        float x = attrib.vertices[3*static_cast<size_t>(index.vertex_index)+0];
-                        float y = attrib.vertices[3*static_cast<size_t>(index.vertex_index)+1];
-                        float z = attrib.vertices[3*static_cast<size_t>(index.vertex_index)+2];
-
-                        worldCoords[vId] = { x, y, z};
-                        screenCoords[vId] = VSoftRenderer::Utils::World2Screen(worldCoords[vId]);
-
-                        float u = attrib.texcoords[2*static_cast<size_t>(index.texcoord_index)+0];
-                        float v = attrib.texcoords[2*static_cast<size_t>(index.texcoord_index)+1];
-                        uvCoords[vId] = {u, v};
-                    }
-
-                    VSoftRenderer::Vector3Float normal = (worldCoords[2] - worldCoords[0]).CrossProduct(worldCoords[1] - worldCoords[0]).Normalized();
-                    float intensity = normal * light.GetDirection();
-                    // back-face culling
-                    if (intensity > 0)
-                    {
-                        VSoftRenderer::Triangle3D::DrawInterpolated(screenCoords[0],
-                                                                    screenCoords[1],
-                                                                    screenCoords[2],
-                                                                    uvCoords,
-                                                                    texture,
-                                                                    intensity);
-                    }
-                    indexOffset += fv;
-                }
-
-            }
-
             // Draw FrameBuffer
             DrawFrameBuffer();
         renderTexture.EndMode();

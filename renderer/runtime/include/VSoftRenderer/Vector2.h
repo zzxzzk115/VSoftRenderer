@@ -6,6 +6,9 @@
 
 #pragma once
 
+#include <iostream>
+#include <stdexcept>
+
 namespace VSoftRenderer
 {
     template <typename T>
@@ -31,8 +34,29 @@ namespace VSoftRenderer
         {
             return Vector2(X * scalar, Y * scalar);
         }
+
+        T& operator[] (size_t index)
+        {
+            if (index == 0) return X;
+            else if (index == 1) return Y;
+            throw std::out_of_range("Index out of range");
+        }
+
+        const T& operator[] (size_t index) const
+        {
+            if (index == 0) return X;
+            else if (index == 1) return Y;
+            throw std::out_of_range("Index out of range");
+        }
     };
 
     using Vector2Int = Vector2<int>;
     using Vector2Float = Vector2<float>;
+
+    template <typename T>
+    std::ostream& operator << (std::ostream& s, Vector2<T>& v)
+    {
+        s << "(" << v.X << ", " << v.Y << ")" << std::endl;
+        return s;
+    }
 } // namespace VSoftRenderer
