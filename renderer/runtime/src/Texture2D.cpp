@@ -25,7 +25,7 @@ namespace VSoftRenderer
     {
         if (x < 0 || x > m_Width || y < 0 || y > m_Height)
         {
-            throw std::runtime_error("Error: Out of range!");
+            throw std::out_of_range("x or y out of range");
         }
         return m_Data[y * m_Width + x];
     }

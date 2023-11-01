@@ -19,17 +19,17 @@ namespace VSoftRenderer
 
         Vector2 operator + (const Vector2& other) const
         {
-            return {X + other.X, Y + other.Y};
+            return Vector2(X + other.X, Y + other.Y);
         }
 
         Vector2 operator - (const Vector2& other) const
         {
-            return {X - other.X, Y - other.Y};
+            return Vector2(X - other.X, Y - other.Y);
         }
 
         Vector2 operator * (T scalar) const
         {
-            return {X * scalar, Y * scalar};
+            return Vector2(X * scalar, Y * scalar);
         }
     };
 

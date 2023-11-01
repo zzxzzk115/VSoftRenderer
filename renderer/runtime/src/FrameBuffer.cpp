@@ -51,7 +51,7 @@ namespace VSoftRenderer
     {
         if (x < 0 || x > m_Width || y < 0 || y > m_Height)
         {
-            throw std::runtime_error("Error: Out of range!");
+            throw std::out_of_range("x or y out of range");
         }
         return m_PixelData[y * m_Width + x];
     }
@@ -60,7 +60,7 @@ namespace VSoftRenderer
     {
         if (x < 0 || x > m_Width || y < 0 || y > m_Height)
         {
-            throw std::runtime_error("Error: Out of range!");
+            throw std::out_of_range("x or y out of range");
         }
         m_PixelData[y * m_Width + x].PixelColor = color;
     }
@@ -69,7 +69,7 @@ namespace VSoftRenderer
     {
         if (x < 0 || x > m_Width || y < 0 || y > m_Height)
         {
-            throw std::runtime_error("Error: Out of range!");
+            throw std::out_of_range("x or y out of range");
         }
         return m_ZBuffer[y * m_Width + x];
     }
@@ -78,7 +78,7 @@ namespace VSoftRenderer
     {
         if (x < 0 || x > m_Width || y < 0 || y > m_Height)
         {
-            throw std::runtime_error("Error: Out of range!");
+            throw std::out_of_range("x or y out of range");
         }
         m_ZBuffer[y * m_Width + x] = zValue;
     }
