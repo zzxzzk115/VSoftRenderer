@@ -26,8 +26,8 @@
 > 
 > - Gouraud Shading
 >   ![Gouraud](Media/Showcases/Gouraud.png)
-> - Gouraud Shading with Texture
->   ![GouraudTexture](Media/Showcases/Gouraud_Texture.png)
+> - Gouraud Shading with Normal Texture
+>   ![Gouraud Normal Texture](Media/Showcases/Gouraud_Normal_Texture.png)
 
 ## Features
 
@@ -39,26 +39,28 @@
         ```c++
         struct GouraudShader : public VGLShaderBase
         {
-            int BindTextureSlot;
-        
+            int BindDiffuseTextureSlot;
+            int BindNormalTextureSlot;
+            
             Vector3Float UniformLightDirection;
             Matrix4      UniformMVP;
+            Matrix4      UniformMVPIT;
         
-            Vector3Float              VaryingIntensity;
             std::vector<Vector2Float> VaryingUVs {3};
         
-            virtual void vert(Vertex& vertex, int vertexIndexInFace, Vector3Float& gl_Position) override
+            virtual void vert(int faceIndex, int vertexIndexInFace, Vector3Float& gl_Position) override
             {
-                VaryingIntensity[vertexIndexInFace] = std::max(0.0f, UniformLightDirection * vertex.Normal);
-                VaryingUVs[vertexIndexInFace] = vertex.UV;
-                gl_Position = UniformMVP * vertex.Position;
+                VaryingUVs[vertexIndexInFace] = TargetMesh->GetUV(faceIndex, vertexIndexInFace);
+                gl_Position = UniformMVP * gl_Position;
             }
         
             virtual bool frag(Vector3Float bc, VGL::Color& gl_FragColor) override
             {
-                float intensity = VaryingIntensity * bc;
                 Vector2Float uv = VaryingUVs[0] * bc.X + VaryingUVs[1] * bc.Y + VaryingUVs[2] * bc.Z;
-                gl_FragColor = sample2D(BindTextureSlot, uv.X, uv.Y) * intensity;
+                Vector3Float n = (UniformMVPIT * sample2D(BindNormalTextureSlot, uv.X, uv.Y).XYZ()).Normalized();
+                Vector3Float l = (UniformMVP * UniformLightDirection).Normalized();
+                float intensity = std::max(0.0f, n * l);
+                gl_FragColor = sample2D(BindDiffuseTextureSlot, uv.X, uv.Y) * intensity;
                 return false;
             }
         };
@@ -66,7 +68,7 @@
       
     - Use OpenGL-like APIs:
       ```c++
-      // ... load mesh & texture from disk
+      // ... load meshes & textures from disk
 
       glViewPort(0, 0, 800, 800);
       
@@ -86,15 +88,18 @@
 
       Matrix4 mvp = projectionMatrix * viewMatrix * modelMatrix;
 
-      glBindTexture(0, texture);
-
+      glBindTexture(0, diffuseTexture);
+      glBindTexture(1, normalTexture);
+    
       GouraudShader shader = {};
       shader.UniformMVP = mvp;
+      shader.UniformMVPIT = mvp.InverseTranspose();
       shader.UniformLightDirection = light.GetDirection();
-      shader.BindTextureSlot = 0;
-
+      shader.BindDiffuseTextureSlot = 0;
+      shader.BindNormalTextureSlot = 1;
+    
       glBindShader(0, &shader);
-
+    
       for (int meshIndex = 0; meshIndex < meshes.size(); ++meshIndex)
       {
           glBindMesh(meshIndex, meshes[meshIndex]);

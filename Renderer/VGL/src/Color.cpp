@@ -53,4 +53,6 @@ namespace VGL
                 static_cast<unsigned char>(B / scalar),
                 static_cast<unsigned char>(A / scalar) };
     }
+
+    Vector3Float Color::XYZ() const { return Vector3Float(R, G, B); }
 } // namespace VGL

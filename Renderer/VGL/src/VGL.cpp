@@ -76,7 +76,13 @@ namespace VGL
             throw std::runtime_error("MeshSlot not found!");
         }
 
+        if (g_vglState.UsingShader == nullptr)
+        {
+            throw std::runtime_error("No shader bound!");
+        }
+
         auto* mesh = g_vglState.MeshMap[meshSlot];
+        g_vglState.UsingShader->TargetMesh = mesh;
 
         for (int faceIndex = 0; faceIndex < mesh->Faces.size(); ++faceIndex)
         {
@@ -85,16 +91,10 @@ namespace VGL
             Vector3Float screenCoords[3];
             for (int v = 0; v < 3; ++v)
             {
-                auto& vertex = mesh->Vertices[face.Indices[v]];
+                auto vertexPosition = mesh->Vertices[face.VertexIndices[v]];
 
-                if (g_vglState.UsingShader == nullptr)
-                {
-                    throw std::runtime_error("No shader bound!");
-                }
-
-                Vector3Float position;
-                g_vglState.UsingShader->vert(vertex, v, position);
-                screenCoords[v] = g_vglState.ViewportMatrix * position;
+                g_vglState.UsingShader->vert(faceIndex, v, vertexPosition);
+                screenCoords[v] = g_vglState.ViewportMatrix * vertexPosition;
             }
             Triangle3D::DrawInterpolated(screenCoords, g_vglState.UsingShader);
         }

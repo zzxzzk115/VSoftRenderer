@@ -6,6 +6,7 @@
 
 #pragma once
 
+#include "Vector3.h"
 #include <cmath>
 #include <stdexcept>
 
@@ -26,6 +27,8 @@ namespace VGL
         Color operator - (const Color& other) const;
         Color operator * (float scalar) const;
         Color operator / (float scalar) const;
+
+        Vector3Float XYZ() const;
 
         const static Color COLOR_WHITE;
         const static Color COLOR_BLACK;

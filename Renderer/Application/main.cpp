@@ -36,26 +36,28 @@ void DrawFrameBuffer()
 
 struct GouraudShader : public VGLShaderBase
 {
-    int BindTextureSlot;
+    int BindDiffuseTextureSlot;
+    int BindNormalTextureSlot;
 
     Vector3Float UniformLightDirection;
     Matrix4      UniformMVP;
+    Matrix4      UniformMVPIT;
 
-    Vector3Float              VaryingIntensity;
     std::vector<Vector2Float> VaryingUVs {3};
 
-    virtual void vert(Vertex& vertex, int vertexIndexInFace, Vector3Float& gl_Position) override
+    virtual void vert(int faceIndex, int vertexIndexInFace, Vector3Float& gl_Position) override
     {
-        VaryingIntensity[vertexIndexInFace] = std::max(0.0f, UniformLightDirection * vertex.Normal);
-        VaryingUVs[vertexIndexInFace] = vertex.UV;
-        gl_Position = UniformMVP * vertex.Position;
+        VaryingUVs[vertexIndexInFace] = TargetMesh->GetUV(faceIndex, vertexIndexInFace);
+        gl_Position = UniformMVP * gl_Position;
     }
 
     virtual bool frag(Vector3Float bc, VGL::Color& gl_FragColor) override
     {
-        float intensity = VaryingIntensity * bc;
         Vector2Float uv = VaryingUVs[0] * bc.X + VaryingUVs[1] * bc.Y + VaryingUVs[2] * bc.Z;
-        gl_FragColor = sample2D(BindTextureSlot, uv.X, uv.Y) * intensity;
+        Vector3Float n = (UniformMVPIT * sample2D(BindNormalTextureSlot, uv.X, uv.Y).XYZ()).Normalized();
+        Vector3Float l = (UniformMVP * UniformLightDirection).Normalized();
+        float intensity = std::max(0.0f, n * l);
+        gl_FragColor = sample2D(BindDiffuseTextureSlot, uv.X, uv.Y) * intensity;
         return false;
     }
 };
@@ -67,7 +69,7 @@ int main()
     raylib::Texture targetTexture(renderTexture.GetTexture());
 
     // Load a model from disk
-    std::string modelFile = "Resources/Models/obj/african_head.obj";
+    std::string modelFile = "Resources/Models/african_head/african_head.obj";
     tinyobj::ObjReaderConfig readerConfig;
     readerConfig.mtl_search_path = "./"; // Path to material files
 
@@ -98,6 +100,8 @@ int main()
     {
         VGL::Mesh mesh = {};
         mesh.Vertices.resize(attrib.vertices.size());
+        mesh.Normals.resize(attrib.normals.size());
+        mesh.TextureCoords.resize(attrib.texcoords.size());
 
         // Loop over faces(polygon)
         size_t indexOffset = 0;
@@ -111,18 +115,16 @@ int main()
             int vertexIndex = 0;
             for (size_t v = 0; v < fv; v++)
             {
-                Vertex vertex = {};
-
                 // access to vertex
                 tinyobj::index_t idx = shapes[s].mesh.indices[indexOffset + v];
                 vertexIndex = static_cast<size_t>(idx.vertex_index);
-                face.Indices.push_back(vertexIndex);
 
                 tinyobj::real_t vx = attrib.vertices[3*static_cast<size_t>(idx.vertex_index)+0];
                 tinyobj::real_t vy = attrib.vertices[3*static_cast<size_t>(idx.vertex_index)+1];
                 tinyobj::real_t vz = attrib.vertices[3*static_cast<size_t>(idx.vertex_index)+2];
 
-                vertex.Position = { vx, vy, vz };
+                mesh.Vertices[vertexIndex] = { vx, vy, vz };
+                face.VertexIndices.push_back(vertexIndex);
 
                 // Check if `normal_index` is zero or positive. negative = no normal data
                 if (idx.normal_index >= 0)
@@ -131,7 +133,10 @@ int main()
                     tinyobj::real_t ny = attrib.normals[3*static_cast<size_t>(idx.normal_index)+1];
                     tinyobj::real_t nz = attrib.normals[3*static_cast<size_t>(idx.normal_index)+2];
 
-                    vertex.Normal = { nx, ny, nz };
+                    auto normalIndex = static_cast<size_t>(idx.normal_index);
+
+                    mesh.Normals[normalIndex] = { nx, ny, nz };
+                    face.NormalIndices.push_back(normalIndex);
                 }
 
                 // Check if `texcoord_index` is zero or positive. negative = no texcoord data
@@ -140,15 +145,16 @@ int main()
                     tinyobj::real_t tx = attrib.texcoords[2*static_cast<size_t>(idx.texcoord_index)+0];
                     tinyobj::real_t ty = attrib.texcoords[2*static_cast<size_t>(idx.texcoord_index)+1];
 
-                    vertex.UV = { tx, ty };
+                    auto texCoordIndex = static_cast<size_t>(idx.texcoord_index);
+
+                    mesh.TextureCoords[texCoordIndex] = { tx, ty };
+                    face.TextureCoordIndices.push_back(texCoordIndex);
                 }
 
                 // Optional: vertex colors
                 // tinyobj::real_t red   = attrib.colors[3*size_t(idx.vertex_index)+0];
                 // tinyobj::real_t green = attrib.colors[3*size_t(idx.vertex_index)+1];
                 // tinyobj::real_t blue  = attrib.colors[3*size_t(idx.vertex_index)+2];
-
-                mesh.Vertices[vertexIndex] = vertex;
             }
             indexOffset += fv;
             mesh.Faces.push_back(face);
@@ -162,18 +168,30 @@ int main()
 
     SetTargetFPS(60);
 
-    // Load a texture image from disk
-    auto textureImageData = raylib::Image("Resources/Textures/tga/african_head_diffuse.tga");
-    if (!textureImageData.IsReady())
+    // Load a diffuse texture image from disk
+    auto diffuseTextureImageData = raylib::Image("Resources/Textures/african_head/african_head_diffuse.tga");
+    if (!diffuseTextureImageData.IsReady())
     {
         std::cerr << "Failed to load texture!!!" << std::endl;
         return -2;
     }
 
-    int textureImageWidth  = textureImageData.width;
-    int textureImageHeight = textureImageData.height;
-    VGL::Color* textureColors = (VGL::Color*)LoadImageColors(textureImageData);
-    VGL::Texture2D texture(textureImageWidth, textureImageHeight, textureColors);
+    int diffuseTextureImageWidth  = diffuseTextureImageData.width;
+    int diffuseTextureImageHeight = diffuseTextureImageData.height;
+    VGL::Color* diffuseTextureColors = (VGL::Color*)LoadImageColors(diffuseTextureImageData);
+    VGL::Texture2D diffuseTexture(diffuseTextureImageWidth, diffuseTextureImageHeight, diffuseTextureColors);
+
+    auto normalTextureImageData = raylib::Image("Resources/Textures/african_head/african_head_nm.tga");
+    if (!normalTextureImageData.IsReady())
+    {
+        std::cerr << "Failed to load texture!!!" << std::endl;
+        return -2;
+    }
+
+    int normalTextureImageWidth  = normalTextureImageData.width;
+    int normalTextureImageHeight = normalTextureImageData.height;
+    VGL::Color* normalTextureColors = (VGL::Color*)LoadImageColors(normalTextureImageData);
+    VGL::Texture2D normalTexture(normalTextureImageWidth, normalTextureImageHeight, normalTextureColors);
 
     DirectionalLight light(Vector3Float(1, 1, 1).Normalized());
 
@@ -185,7 +203,7 @@ int main()
     // Camera parameters
     Vector3Float eye(1 , 1, 3);
     Vector3Float center(0 , 0, 0);
-    Vector3Float up(0 , 1, 0);
+    Vector3Float up(0, 1, 0);
 
     Matrix4 modelMatrix = Matrix4::Identity();
     Matrix4 viewMatrix = glLookAt(eye, center, up);
@@ -193,12 +211,15 @@ int main()
 
     Matrix4 mvp = projectionMatrix * viewMatrix * modelMatrix;
 
-    glBindTexture(0, texture);
+    glBindTexture(0, diffuseTexture);
+    glBindTexture(1, normalTexture);
 
     GouraudShader shader = {};
     shader.UniformMVP = mvp;
+    shader.UniformMVPIT = mvp.InverseTranspose();
     shader.UniformLightDirection = light.GetDirection();
-    shader.BindTextureSlot = 0;
+    shader.BindDiffuseTextureSlot = 0;
+    shader.BindNormalTextureSlot = 1;
 
     glBindShader(0, &shader);
 

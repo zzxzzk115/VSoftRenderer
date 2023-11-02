@@ -148,6 +148,11 @@ namespace VGL
 
         for (int col = 0; col < 3; col++)
         {
+            if (matrix3.m_Matrix[col][col] == 0.0f)
+            {
+                return 0.0f;
+            }
+
             for (int row = col + 1; row < 3; row++)
             {
                 float factor = matrix3.m_Matrix[row][col] / matrix3.m_Matrix[col][col];

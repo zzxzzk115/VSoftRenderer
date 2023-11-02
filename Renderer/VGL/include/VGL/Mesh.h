@@ -14,19 +14,21 @@ namespace VGL
 {
     struct TriangleFace
     {
-        std::vector<int>    Indices;
-    };
-
-    struct Vertex
-    {
-        Vector3Float Position;
-        Vector3Float Normal;
-        Vector2Float UV;
+        std::vector<int> VertexIndices;
+        std::vector<int> TextureCoordIndices;
+        std::vector<int> NormalIndices;
     };
 
     struct Mesh
     {
         std::vector<TriangleFace> Faces;
-        std::vector<Vertex>       Vertices;
+        std::vector<Vector3Float> Vertices;
+        std::vector<Vector3Float> Normals;
+        std::vector<Vector2Float> TextureCoords;
+
+        Vector2Float GetUV(int faceIndex, int vertexIndexInFace)
+        {
+            return TextureCoords[Faces[faceIndex].TextureCoordIndices[vertexIndexInFace]];
+        }
     };
 } // namespace VGL

@@ -18,9 +18,11 @@ namespace VGL
 {
     struct VGLShaderBase
     {
+        Mesh* TargetMesh;
+
         virtual ~VGLShaderBase() = default;
 
-        virtual void vert(Vertex& vertex, int vertexIndexInFace, Vector3Float& gl_Position) = 0;
+        virtual void vert(int faceIndex, int vertexIndexInFace, Vector3Float& gl_Position) = 0;
         virtual bool frag(Vector3Float bc, Color& gl_FragColor) = 0;
 
         Color sample2D(int textureSlot, float u, float v);
