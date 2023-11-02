@@ -119,8 +119,8 @@ Checks: '-*,
     google-explicit-constructor,
     google-readability-casting,
     google-readability-avoid-underscore-in-googletest-name,
-    google-Runtime-int,
-    google-Runtime-operator,
+    google-runtime-int,
+    google-runtime-operator,
 
     hicpp-exception-baseclass,
 

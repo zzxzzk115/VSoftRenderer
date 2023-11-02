@@ -61,19 +61,6 @@ ForEachMacros:
   - Q_FOREACH
   - BOOST_FOREACH
 IncludeBlocks: Preserve
-IncludeCategories: 
-  - Regex:           '^"(core/pilot_prerequisites)/'
-    Priority:        -1
-  - Regex:           '^"(core)/)'
-    Priority:        5
-  - Regex:           '^"(Runtime)/)'
-    Priority:        4
-  - Regex:           '^"(client|server)/)'
-    Priority:        3
-  - Regex:           '^"(sketum)/)'
-    Priority:        2
-  - Regex:           '.*'
-    Priority:        1
 IndentCaseLabels: true
 IndentWidth:     4
 IndentExternBlock: AfterExternBlock
