@@ -179,7 +179,7 @@ Then open the generated project file with XCode.
 
 We would like to thank the following projects for their invaluable contribution to our work:
 
-- [TinyRenderer](https://github.com/ssloy/tinyrenderer)
+- [tinyrenderer](https://github.com/ssloy/tinyrenderer)
 - [raylib](https://github.com/raysan5/raylib)
 - [tinyobjloader](https://github.com/tinyobjloader/tinyobjloader)
 
