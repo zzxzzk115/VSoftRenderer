@@ -9,15 +9,35 @@
 #include "VSoftRenderer/Color.h"
 #include "VSoftRenderer/Matrix4.h"
 #include "VSoftRenderer/Vector3.h"
+#include "VSoftRenderer/Mesh.h"
+#include "VSoftRenderer/Texture2D.h"
+
+#include <map>
 
 namespace VSoftRenderer
 {
+    struct VGLShaderBase
+    {
+        virtual ~VGLShaderBase() = default;
+
+        virtual Vector3Float vert(Vertex& vertex, int vertexIndexInFace);
+        virtual bool frag(Vector3Float bc, Color& color) = 0;
+
+        Color sample2D(int textureSlot, float u, float v);
+    };
+
     struct VGLState
     {
         Color   ClearColor;
 
         Matrix4 ViewportMatrix = Matrix4::Identity();
         float   ViewDepth = 255.0f;
+
+        std::map<int, Mesh*> MeshMap;
+        std::map<int, VGLShaderBase*> ShaderMap;
+        std::map<int, Texture2D*> TextureMap;
+
+        VGLShaderBase* UsingShader;
     };
 
     extern VGLState g_vglState;
@@ -55,4 +75,12 @@ namespace VSoftRenderer
         projectionMatrix[3][2] = -1.0f / (eye - center).GetLength();
         return projectionMatrix;
     }
+
+    void glBindMesh(int meshSlot, Mesh& mesh);
+    void glDrawMeshIndexed(int meshSlot);
+
+    void glBindTexture(int textureSlot, Texture2D& mesh);
+
+    void glBindShader(int shaderSlot, VGLShaderBase* shader);
+    void glUseShaderProgram(int shaderSlot);
 } // namespace VSoftRenderer

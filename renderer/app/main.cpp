@@ -7,9 +7,6 @@
 #include "VSoftRenderer/DirectionalLight.h"
 #include "VSoftRenderer/FrameBuffer.h"
 #include "VSoftRenderer/Matrix4.h"
-#include "VSoftRenderer/Texture2D.h"
-#include "VSoftRenderer/Triangle3D.h"
-#include "VSoftRenderer/Utils.h"
 #include "VSoftRenderer/VGL.h"
 
 #include <raylib-cpp.hpp>
@@ -19,21 +16,46 @@
 
 #include <iostream>
 
+using namespace VSoftRenderer;
+
 const int ScreenWidth = 800;
 const int ScreenHeight = 800;
 
 void DrawFrameBuffer()
 {
-    auto frameBufferSize = VSoftRenderer::FrameBuffer::GetInstance()->GetSize();
+    auto frameBufferSize = FrameBuffer::GetInstance()->GetSize();
     for (int i = 0; i < frameBufferSize.X; ++i)
     {
         for (int j = 0; j < frameBufferSize.Y; ++j)
         {
-            auto color = VSoftRenderer::FrameBuffer::GetInstance()->GetPixel(i, j).PixelColor;
+            auto color = FrameBuffer::GetInstance()->GetPixel(i, j).PixelColor;
             DrawPixel(i, j, {color.R, color.G, color.B, color.A});
         }
     }
 }
+
+struct GouraudShader : public VGLShaderBase
+{
+    Vector3Float LightDirection;
+
+    Matrix4 MVP;
+
+    Vector3Float VaryingIntensity; // written by vertex shader, read by fragment shader
+
+    virtual Vector3Float vert(Vertex& vertex, int vertexIndexInFace) override
+    {
+        VaryingIntensity[vertexIndexInFace] = std::max(0.0f, LightDirection * vertex.Normal);
+        Vector3Float glVertex = MVP * VGLShaderBase::vert(vertex, vertexIndexInFace);
+        return glVertex;
+    }
+
+    virtual bool frag(Vector3Float bc, VSoftRenderer::Color& color) override
+    {
+        float intensity = VaryingIntensity * bc;
+        color = VSoftRenderer::Color::COLOR_WHITE * intensity;
+        return false;
+    }
+};
 
 int main() 
 {
@@ -41,33 +63,101 @@ int main()
     raylib::RenderTexture2D renderTexture(ScreenWidth, ScreenHeight);
     raylib::Texture targetTexture(renderTexture.GetTexture());
 
-    SetTargetFPS(60);
+    // Load a model from disk
+    std::string modelFile = "resources/models/obj/african_head.obj";
+    tinyobj::ObjReaderConfig readerConfig;
+    readerConfig.mtl_search_path = "./"; // Path to material files
 
-    // Load a model from disk by using tinyobjloader
-    std::string inputFile = "resources/models/obj/african_head.obj";
-    tinyobj::attrib_t attrib;
-    std::vector<tinyobj::shape_t> shapes;
-    std::vector<tinyobj::material_t> materials;
+    tinyobj::ObjReader reader;
 
-    std::string warn;
-    std::string err;
-
-    bool ret = tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, inputFile.c_str());
-
-    if (!warn.empty())
+    if (!reader.ParseFromFile(modelFile, readerConfig))
     {
-        std::cout << warn << std::endl;
-    }
-
-    if (!err.empty())
-    {
-        std::cerr << err << std::endl;
-    }
-
-    if (!ret)
-    {
+        if (!reader.Error().empty())
+        {
+            std::cerr << "TinyObjReader: " << reader.Error();
+        }
         return -1;
     }
+
+    if (!reader.Warning().empty())
+    {
+        std::cout << "TinyObjReader: " << reader.Warning();
+    }
+
+    auto& attrib = reader.GetAttrib();
+    auto& shapes = reader.GetShapes();
+    auto& materials = reader.GetMaterials();
+
+    std::vector<VSoftRenderer::Mesh> meshes;
+
+    // Loop over shapes
+    for (size_t s = 0; s < shapes.size(); s++)
+    {
+        VSoftRenderer::Mesh mesh = {};
+        mesh.Vertices.resize(attrib.vertices.size());
+
+        // Loop over faces(polygon)
+        size_t indexOffset = 0;
+        for (size_t f = 0; f < shapes[s].mesh.num_face_vertices.size(); f++)
+        {
+            TriangleFace face = {};
+
+            size_t fv = static_cast<size_t>(shapes[s].mesh.num_face_vertices[f]);
+
+            // Loop over vertices in the face.
+            int vertexIndex = 0;
+            for (size_t v = 0; v < fv; v++)
+            {
+                Vertex vertex = {};
+
+                // access to vertex
+                tinyobj::index_t idx = shapes[s].mesh.indices[indexOffset + v];
+                vertexIndex = static_cast<size_t>(idx.vertex_index);
+                face.Indices.push_back(vertexIndex);
+
+                tinyobj::real_t vx = attrib.vertices[3*static_cast<size_t>(idx.vertex_index)+0];
+                tinyobj::real_t vy = attrib.vertices[3*static_cast<size_t>(idx.vertex_index)+1];
+                tinyobj::real_t vz = attrib.vertices[3*static_cast<size_t>(idx.vertex_index)+2];
+
+                vertex.Position = { vx, vy, vz };
+
+                // Check if `normal_index` is zero or positive. negative = no normal data
+                if (idx.normal_index >= 0)
+                {
+                    tinyobj::real_t nx = attrib.normals[3*static_cast<size_t>(idx.normal_index)+0];
+                    tinyobj::real_t ny = attrib.normals[3*static_cast<size_t>(idx.normal_index)+1];
+                    tinyobj::real_t nz = attrib.normals[3*static_cast<size_t>(idx.normal_index)+2];
+
+                    vertex.Normal = { nx, ny, nz };
+                }
+
+                // Check if `texcoord_index` is zero or positive. negative = no texcoord data
+                if (idx.texcoord_index >= 0)
+                {
+                    tinyobj::real_t tx = attrib.texcoords[2*static_cast<size_t>(idx.texcoord_index)+0];
+                    tinyobj::real_t ty = attrib.texcoords[2*static_cast<size_t>(idx.texcoord_index)+1];
+
+                    vertex.UV = { tx, ty };
+                }
+
+                // Optional: vertex colors
+                // tinyobj::real_t red   = attrib.colors[3*size_t(idx.vertex_index)+0];
+                // tinyobj::real_t green = attrib.colors[3*size_t(idx.vertex_index)+1];
+                // tinyobj::real_t blue  = attrib.colors[3*size_t(idx.vertex_index)+2];
+
+                mesh.Vertices[vertexIndex] = vertex;
+            }
+            indexOffset += fv;
+            mesh.Faces.push_back(face);
+
+            // per-face material
+            shapes[s].mesh.material_ids[f];
+        }
+
+        meshes.push_back(mesh);
+    }
+
+    SetTargetFPS(60);
 
     // Load a texture image from disk
     auto textureImageData = raylib::Image("resources/textures/tga/african_head_diffuse.tga");
@@ -82,66 +172,35 @@ int main()
     VSoftRenderer::Color* textureColors = (VSoftRenderer::Color*)LoadImageColors(textureImageData);
     VSoftRenderer::Texture2D texture(textureImageWidth, textureImageHeight, textureColors);
 
-    VSoftRenderer::DirectionalLight light({0, 0, -1});
+    DirectionalLight light(Vector3Float(1, 1, 1).Normalized());
 
-    VSoftRenderer::glViewPort(0, 0, ScreenWidth, ScreenHeight);
+    glViewPort(0, 0, ScreenWidth, ScreenHeight);
 
-    VSoftRenderer::glClearColor({50, 50, 50, 255});
-    VSoftRenderer::glClear();
+    glClearColor({50, 50, 50, 255});
+    glClear();
 
     // Camera parameters
-    VSoftRenderer::Vector3Float eye(1 , 1, 3);
-    VSoftRenderer::Vector3Float center(0 , 0, 0);
-    VSoftRenderer::Vector3Float up(0 , 1, 0);
+    Vector3Float eye(1 , 1, 3);
+    Vector3Float center(0 , 0, 0);
+    Vector3Float up(0 , 1, 0);
 
-    VSoftRenderer::Matrix4 modelMatrix = VSoftRenderer::Matrix4::Identity();
-    VSoftRenderer::Matrix4 viewMatrix = VSoftRenderer::glLookAt(eye, center, up);
-    VSoftRenderer::Matrix4 projectionMatrix = VSoftRenderer::glProjection(eye, center);
+    Matrix4 modelMatrix = Matrix4::Identity();
+    Matrix4 viewMatrix = glLookAt(eye, center, up);
+    Matrix4 projectionMatrix = glProjection(eye, center);
 
-    VSoftRenderer::Matrix4 modelViewProjectionViewportMatrix = VSoftRenderer::g_vglState.ViewportMatrix * projectionMatrix * viewMatrix * modelMatrix;
+    Matrix4 mvp = projectionMatrix * viewMatrix * modelMatrix;
 
-    // Flat Shading Renderer
-    // Loop over shapes
-    for (size_t s = 0; s < shapes.size(); s++)
+    GouraudShader shader = {};
+    shader.MVP = mvp;
+    shader.LightDirection = light.GetDirection();
+
+    glBindShader(0, &shader);
+
+    for (int meshIndex = 0; meshIndex < meshes.size(); ++meshIndex)
     {
-        // Loop over faces(polygon)
-        size_t indexOffset = 0;
-        for (size_t f = 0; f < shapes[s].mesh.num_face_vertices.size(); f++)
-        {
-            auto fv = static_cast<size_t>(shapes[s].mesh.num_face_vertices[f]);
-
-            // Loop over vertices in the face.
-            VSoftRenderer::Vector3Int   screenCoords[3];
-            VSoftRenderer::Vector3Float worldCoords[3];
-            VSoftRenderer::Vector2Float uvCoords[3];
-            for (size_t vId = 0; vId < 3; vId++)
-            {
-                auto index = shapes[s].mesh.indices[indexOffset + vId];
-
-                float x = attrib.vertices[3*static_cast<size_t>(index.vertex_index)+0];
-                float y = attrib.vertices[3*static_cast<size_t>(index.vertex_index)+1];
-                float z = attrib.vertices[3*static_cast<size_t>(index.vertex_index)+2];
-
-                worldCoords[vId] = { x, y, z };
-                screenCoords[vId] = VSoftRenderer::Utils::Vector3Float2Int(modelViewProjectionViewportMatrix * worldCoords[vId]);
-
-                float u = attrib.texcoords[2*static_cast<size_t>(index.texcoord_index)+0];
-                float v = attrib.texcoords[2*static_cast<size_t>(index.texcoord_index)+1];
-                uvCoords[vId] = {u, v};
-            }
-
-            VSoftRenderer::Vector3Float normal = (worldCoords[2] - worldCoords[0]).CrossProduct(worldCoords[1] - worldCoords[0]).Normalized();
-            float intensity = normal * light.GetDirection();
-            intensity = std::max(0.0f, intensity);
-            VSoftRenderer::Triangle3D::DrawInterpolated(screenCoords[0],
-                                                        screenCoords[1],
-                                                        screenCoords[2],
-                                                        uvCoords,
-                                                        texture,
-                                                        intensity);
-            indexOffset += fv;
-        }
-
+        glBindMesh(meshIndex, meshes[meshIndex]);
+        glUseShaderProgram(0);
+        glDrawMeshIndexed(meshIndex);
     }
 
     while (!window.ShouldClose())
@@ -152,7 +211,7 @@ int main()
         renderTexture.EndMode();
 
         BeginDrawing();
-            window.ClearBackground(BLACK);
+            window.ClearBackground(raylib::Color::Black());
             targetTexture.Draw(0, 0);
         EndDrawing();
     }
