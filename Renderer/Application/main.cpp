@@ -36,27 +36,26 @@ void DrawFrameBuffer()
 
 struct GouraudShader : public VGLShaderBase
 {
-    int TextureSlot;
-    Vector3Float LightDirection;
+    int BindTextureSlot;
 
-    Matrix4 MVP;
+    Vector3Float UniformLightDirection;
+    Matrix4      UniformMVP;
 
-    Vector3Float              VaryingIntensity; // written by vertex shader, read by fragment shader
+    Vector3Float              VaryingIntensity;
     std::vector<Vector2Float> VaryingUVs {3};
 
-    virtual Vector3Float vert(Vertex& vertex, int vertexIndexInFace) override
+    virtual void vert(Vertex& vertex, int vertexIndexInFace, Vector3Float& gl_Position) override
     {
-        VaryingIntensity[vertexIndexInFace] = std::max(0.0f, LightDirection * vertex.Normal);
+        VaryingIntensity[vertexIndexInFace] = std::max(0.0f, UniformLightDirection * vertex.Normal);
         VaryingUVs[vertexIndexInFace] = vertex.UV;
-        Vector3Float glVertex = MVP * VGLShaderBase::vert(vertex, vertexIndexInFace);
-        return glVertex;
+        gl_Position = UniformMVP * vertex.Position;
     }
 
-    virtual bool frag(Vector3Float bc, VGL::Color& color) override
+    virtual bool frag(Vector3Float bc, VGL::Color& gl_FragColor) override
     {
         float intensity = VaryingIntensity * bc;
         Vector2Float uv = VaryingUVs[0] * bc.X + VaryingUVs[1] * bc.Y + VaryingUVs[2] * bc.Z;
-        color = sample2D(TextureSlot, uv.X, uv.Y) * intensity;
+        gl_FragColor = sample2D(BindTextureSlot, uv.X, uv.Y) * intensity;
         return false;
     }
 };
@@ -197,9 +196,9 @@ int main()
     glBindTexture(0, texture);
 
     GouraudShader shader = {};
-    shader.MVP = mvp;
-    shader.LightDirection = light.GetDirection();
-    shader.TextureSlot = 0;
+    shader.UniformMVP = mvp;
+    shader.UniformLightDirection = light.GetDirection();
+    shader.BindTextureSlot = 0;
 
     glBindShader(0, &shader);
 

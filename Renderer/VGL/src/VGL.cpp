@@ -12,11 +12,6 @@ namespace VGL
 {
     VGLState g_vglState = {};
 
-    Vector3Float VGLShaderBase::vert(Vertex& vertex, int vertexIndexInFace)
-    {
-        return vertex.Position;
-    }
-
     Color VGLShaderBase::sample2D(int textureSlot, float u, float v)
     {
         if (g_vglState.TextureMap.count(textureSlot) == 0)
@@ -97,7 +92,9 @@ namespace VGL
                     throw std::runtime_error("No shader bound!");
                 }
 
-                screenCoords[v] = g_vglState.ViewportMatrix * g_vglState.UsingShader->vert(vertex, v);
+                Vector3Float position;
+                g_vglState.UsingShader->vert(vertex, v, position);
+                screenCoords[v] = g_vglState.ViewportMatrix * position;
             }
             Triangle3D::DrawInterpolated(screenCoords, g_vglState.UsingShader);
         }
