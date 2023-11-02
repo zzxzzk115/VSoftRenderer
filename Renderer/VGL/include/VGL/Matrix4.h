@@ -54,6 +54,13 @@ namespace VGL
         void SetIdentity();
         Matrix4 Transpose() const;
 
+        Matrix4 Adjugate() const;
+        float   AlgebraicCofactor(int i, int j) const;
+        float   Determinant() const;
+
+        Matrix4 InverseTranspose() const;
+        Matrix4 Inverse() const;
+
         static Matrix4 Identity();
 
     private:

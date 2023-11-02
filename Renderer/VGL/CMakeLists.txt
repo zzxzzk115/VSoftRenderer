@@ -12,6 +12,7 @@ add_library(${TARGET_NAME} src/Line.cpp
         src/Matrix4.cpp
         src/Texture2D.cpp
         src/VGL.cpp
+        src/Matrix3.cpp
 )
 
 set_target_properties(${TARGET_NAME} PROPERTIES CXX_STANDARD 17)
