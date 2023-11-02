@@ -79,7 +79,7 @@ namespace VSoftRenderer
     void glBindMesh(int meshSlot, Mesh& mesh);
     void glDrawMeshIndexed(int meshSlot);
 
-    void glBindTexture(int textureSlot, Texture2D& mesh);
+    void glBindTexture(int textureSlot, Texture2D& texture2D);
 
     void glBindShader(int shaderSlot, VGLShaderBase* shader);
     void glUseShaderProgram(int shaderSlot);

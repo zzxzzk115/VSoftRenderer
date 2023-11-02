@@ -8,6 +8,8 @@ My toy soft renderer.
 > 
 > - Gouraud Shading
 >   ![Gouraud](./media/showcases/Gouraud.png)
+> - Gouraud Shading with Texture
+>   ![GouraudTexture](./media/showcases/Gouraud_Texture.png)
 
 ## Features
 
@@ -17,15 +19,18 @@ My toy soft renderer.
         ```c++
         struct GouraudShader : public VGLShaderBase
         {
+            int TextureSlot;
             Vector3Float LightDirection;
         
             Matrix4 MVP;
         
-            Vector3Float VaryingIntensity; // written by vertex shader, read by fragment shader
+            Vector3Float              VaryingIntensity; // written by vertex shader, read by fragment shader
+            std::vector<Vector2Float> VaryingUVs {3};
         
             virtual Vector3Float vert(Vertex& vertex, int vertexIndexInFace) override
             {
                 VaryingIntensity[vertexIndexInFace] = std::max(0.0f, LightDirection * vertex.Normal);
+                VaryingUVs[vertexIndexInFace] = vertex.UV;
                 Vector3Float glVertex = MVP * VGLShaderBase::vert(vertex, vertexIndexInFace);
                 return glVertex;
             }
@@ -33,7 +38,8 @@ My toy soft renderer.
             virtual bool frag(Vector3Float bc, VSoftRenderer::Color& color) override
             {
                 float intensity = VaryingIntensity * bc;
-                color = VSoftRenderer::Color::COLOR_WHITE * intensity;
+                Vector2Float uv = VaryingUVs[0] * bc.X + VaryingUVs[1] * bc.Y + VaryingUVs[2] * bc.Z;
+                color = sample2D(TextureSlot, uv.X, uv.Y) * intensity;
                 return false;
             }
         };
@@ -41,7 +47,7 @@ My toy soft renderer.
       
     - Use OpenGL-like APIs:
       ```c++
-      // ... load mesh from disk
+      // ... load mesh & texture from disk
 
       glViewPort(0, 0, 800, 800);
       
@@ -61,9 +67,12 @@ My toy soft renderer.
 
       Matrix4 mvp = projectionMatrix * viewMatrix * modelMatrix;
 
+      glBindTexture(0, texture);
+
       GouraudShader shader = {};
       shader.MVP = mvp;
       shader.LightDirection = light.GetDirection();
+      shader.TextureSlot = 0;
 
       glBindShader(0, &shader);
 

@@ -103,9 +103,9 @@ namespace VSoftRenderer
         }
     }
 
-    void glBindTexture(int textureSlot, Texture2D& mesh)
+    void glBindTexture(int textureSlot, Texture2D& texture2D)
     {
-        g_vglState.TextureMap[textureSlot] = &mesh;
+        g_vglState.TextureMap[textureSlot] = &texture2D;
     }
 
     void glBindShader(int shaderSlot, VGLShaderBase* shader)
