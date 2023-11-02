@@ -30,7 +30,7 @@ endif()
 
 add_executable(${PROJECT_NAME} main.cpp)
 #set(raylib_VERBOSE 1)
-target_link_libraries(${PROJECT_NAME} PUBLIC raylib raylib_cpp VSoftRendererRuntime tinyobjloader)
+target_link_libraries(${PROJECT_NAME} PUBLIC raylib raylib_cpp VGL tinyobjloader)
 # Web Configurations
 if (${PLATFORM} STREQUAL "Web")
     # Tell Emscripten to build an example.html file.

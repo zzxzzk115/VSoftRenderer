@@ -4,10 +4,10 @@
 // Created or modified by Kexuan Zhang on 2023/10/28 15:50.
 //
 
-#include "VSoftRenderer/DirectionalLight.h"
-#include "VSoftRenderer/FrameBuffer.h"
-#include "VSoftRenderer/Matrix4.h"
-#include "VSoftRenderer/VGL.h"
+#include "VGL/DirectionalLight.h"
+#include "VGL/FrameBuffer.h"
+#include "VGL/Matrix4.h"
+#include "VGL/VGL.h"
 
 #include <raylib-cpp.hpp>
 
@@ -16,7 +16,7 @@
 
 #include <iostream>
 
-using namespace VSoftRenderer;
+using namespace VGL;
 
 const int ScreenWidth = 800;
 const int ScreenHeight = 800;
@@ -52,7 +52,7 @@ struct GouraudShader : public VGLShaderBase
         return glVertex;
     }
 
-    virtual bool frag(Vector3Float bc, VSoftRenderer::Color& color) override
+    virtual bool frag(Vector3Float bc, VGL::Color& color) override
     {
         float intensity = VaryingIntensity * bc;
         Vector2Float uv = VaryingUVs[0] * bc.X + VaryingUVs[1] * bc.Y + VaryingUVs[2] * bc.Z;
@@ -92,12 +92,12 @@ int main()
     auto& shapes = reader.GetShapes();
     auto& materials = reader.GetMaterials();
 
-    std::vector<VSoftRenderer::Mesh> meshes;
+    std::vector<VGL::Mesh> meshes;
 
     // Loop over shapes
     for (size_t s = 0; s < shapes.size(); s++)
     {
-        VSoftRenderer::Mesh mesh = {};
+        VGL::Mesh mesh = {};
         mesh.Vertices.resize(attrib.vertices.size());
 
         // Loop over faces(polygon)
@@ -173,8 +173,8 @@ int main()
 
     int textureImageWidth  = textureImageData.width;
     int textureImageHeight = textureImageData.height;
-    VSoftRenderer::Color* textureColors = (VSoftRenderer::Color*)LoadImageColors(textureImageData);
-    VSoftRenderer::Texture2D texture(textureImageWidth, textureImageHeight, textureColors);
+    VGL::Color* textureColors = (VGL::Color*)LoadImageColors(textureImageData);
+    VGL::Texture2D texture(textureImageWidth, textureImageHeight, textureColors);
 
     DirectionalLight light(Vector3Float(1, 1, 1).Normalized());
 
