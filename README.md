@@ -1,6 +1,24 @@
 # VSoftRenderer
 
-My toy soft renderer.
+<h4 align="center">
+  <strong>VSoftRenderer</strong> is my cross-platform 3D toy soft renderer.
+</h4>
+
+
+<p align="center">
+    <a href="https://github.com/zzxzzk115/VSoftRenderer/actions" alt="CI-Windows">
+        <img src="https://img.shields.io/github/actions/workflow/status/zzxzzk115/VSoftRenderer/build_windows.yml?branch=master&label=CI-Windows&logo=github" /></a>
+    <a href="https://github.com/zzxzzk115/VSoftRenderer/actions" alt="CI-Linux">
+        <img src="https://img.shields.io/github/actions/workflow/status/zzxzzk115/VSoftRenderer/build_linux.yml?branch=master&label=CI-Linux&logo=github" /></a>
+    <a href="https://github.com/zzxzzk115/VSoftRenderer/actions" alt="CI-MacOS">
+        <img src="https://img.shields.io/github/actions/workflow/status/zzxzzk115/VSoftRenderer/build_macos.yml?branch=master&label=CI-MacOS&logo=github" /></a>
+    <a href="https://github.com/zzxzzk115/VSoftRenderer/issues" alt="GitHub Issues">
+        <img src="https://img.shields.io/github/issues/zzxzzk115/VSoftRenderer">
+    </a>
+    <a href="https://github.com/zzxzzk115/VSoftRenderer/blob/master/LICENSE" alt="GitHub">
+        <img src="https://img.shields.io/github/license/zzxzzk115/VSoftRenderer">
+    </a>
+</p>
 
 > VSoftRenderer is still under development...
 > 
@@ -13,6 +31,8 @@ My toy soft renderer.
 
 ## Features
 
+- Cross Platform (Windows, Linux, macOS)
+- Light-weight Implementation
 - Programmable Shading Pipeline
 
     - Define a shader through C++:
@@ -83,3 +103,86 @@ My toy soft renderer.
           glDrawMeshIndexed(meshIndex);
       }
       ```
+
+## Prerequisites
+
+To build **VSoftRenderer**, you must first install the following tools.
+
+### Windows 10/11
+
+- Visual Studio 2019 (or above) with C++ Desktop Development Environment
+- CMake 3.20 (or above)
+- Git 2.1 (or above)
+
+### Ubuntu 22.04 or above (Linux or WSL2)
+
+Install prerequisite packages:
+
+```bash
+sudo apt-get update
+sudo apt-get install build-essential cmake git clang libx11-dev libxrandr-dev libxrender-dev libglvnd-dev libxinerama-dev libxcursor-dev libxi-dev
+```
+
+### MacOS
+
+- XCode 13 (or above)
+- CMake 3.20 (or above)
+- Git 2.1 (or above)
+
+## Build VSoftRenderer
+
+Clone this repository:
+
+```bash
+git clone --recursive git@github.com:zzxzzk115/VSoftRenderer.git
+```
+
+### Build on Windows
+
+Build it automatically:
+
+Just double-click `build_windows.bat ` or you can simply use Jetbrains CLion to debug or release.
+
+Build it manually:
+
+```bash
+cmake -S . -B build
+```
+
+Then open the generated solution file with Visual Studio.
+
+### Build on Linux / WSL2
+
+Build it automatically:
+
+```bash
+chmod +x *.sh && ./build_linux.sh
+```
+
+### Build on MacOS
+
+Build it automatically:
+
+```bash
+chmod +x *.sh && ./build_macos.sh
+```
+
+Build it manually:
+
+```bash
+cmake -S . -B build -G "Xcode"
+```
+
+Then open the generated project file with XCode.
+  
+## Acknowledgement
+
+We would like to thank the following projects for their invaluable contribution to our work:
+
+- [TinyRenderer](https://github.com/ssloy/tinyrenderer)
+- [raylib](https://github.com/raysan5/raylib)
+- [tinyobjloader](https://github.com/tinyobjloader/tinyobjloader)
+
+## License
+
+This project is licensed under the [MIT](https://github.com/zzxzzk115/VSoftRenderer/blob/master/LICENSE) license.
