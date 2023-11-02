@@ -68,7 +68,7 @@ int main()
     raylib::Texture targetTexture(renderTexture.GetTexture());
 
     // Load a model from disk
-    std::string modelFile = "resources/models/obj/african_head.obj";
+    std::string modelFile = "Resources/Models/obj/african_head.obj";
     tinyobj::ObjReaderConfig readerConfig;
     readerConfig.mtl_search_path = "./"; // Path to material files
 
@@ -164,7 +164,7 @@ int main()
     SetTargetFPS(60);
 
     // Load a texture image from disk
-    auto textureImageData = raylib::Image("resources/textures/tga/african_head_diffuse.tga");
+    auto textureImageData = raylib::Image("Resources/Textures/tga/african_head_diffuse.tga");
     if (!textureImageData.IsReady())
     {
         std::cerr << "Failed to load texture!!!" << std::endl;

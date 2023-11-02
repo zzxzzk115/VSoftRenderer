@@ -15,4 +15,4 @@ jobs:
           submodules: 'true'
 
       - name: Build
-        run: ./build_windows.bat
+        run: ./BuildWindows.bat

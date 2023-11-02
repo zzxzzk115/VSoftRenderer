@@ -7,11 +7,11 @@
 
 <p align="center">
     <a href="https://github.com/zzxzzk115/VSoftRenderer/actions" alt="CI-Windows">
-        <img src="https://img.shields.io/github/actions/workflow/status/zzxzzk115/VSoftRenderer/build_windows.yml?branch=master&label=CI-Windows&logo=github" /></a>
+        <img src="https://img.shields.io/github/actions/workflow/status/zzxzzk115/VSoftRenderer/BuildWindows.yml?branch=master&label=CI-Windows&logo=github" /></a>
     <a href="https://github.com/zzxzzk115/VSoftRenderer/actions" alt="CI-Linux">
-        <img src="https://img.shields.io/github/actions/workflow/status/zzxzzk115/VSoftRenderer/build_linux.yml?branch=master&label=CI-Linux&logo=github" /></a>
+        <img src="https://img.shields.io/github/actions/workflow/status/zzxzzk115/VSoftRenderer/BuildLinux.yml?branch=master&label=CI-Linux&logo=github" /></a>
     <a href="https://github.com/zzxzzk115/VSoftRenderer/actions" alt="CI-MacOS">
-        <img src="https://img.shields.io/github/actions/workflow/status/zzxzzk115/VSoftRenderer/build_macos.yml?branch=master&label=CI-MacOS&logo=github" /></a>
+        <img src="https://img.shields.io/github/actions/workflow/status/zzxzzk115/VSoftRenderer/BuildMacOS.yml?branch=master&label=CI-MacOS&logo=github" /></a>
     <a href="https://github.com/zzxzzk115/VSoftRenderer/issues" alt="GitHub Issues">
         <img src="https://img.shields.io/github/issues/zzxzzk115/VSoftRenderer">
     </a>
@@ -25,9 +25,9 @@
 > Showcases:
 > 
 > - Gouraud Shading
->   ![Gouraud](./media/showcases/Gouraud.png)
+>   ![Gouraud](Media/Showcases/Gouraud.png)
 > - Gouraud Shading with Texture
->   ![GouraudTexture](./media/showcases/Gouraud_Texture.png)
+>   ![GouraudTexture](Media/Showcases/Gouraud_Texture.png)
 
 ## Features
 
@@ -141,7 +141,7 @@ git clone --recursive git@github.com:zzxzzk115/VSoftRenderer.git
 
 Build it automatically:
 
-Just double-click `build_windows.bat ` or you can simply use Jetbrains CLion to debug or release.
+Just double-click `BuildWindows.bat ` or you can simply use Jetbrains CLion to debug or release.
 
 Build it manually:
 
@@ -156,7 +156,7 @@ Then open the generated solution file with Visual Studio.
 Build it automatically:
 
 ```bash
-chmod +x *.sh && ./build_linux.sh
+chmod +x *.sh && ./BuildLinux.sh
 ```
 
 ### Build on MacOS
@@ -164,7 +164,7 @@ chmod +x *.sh && ./build_linux.sh
 Build it automatically:
 
 ```bash
-chmod +x *.sh && ./build_macos.sh
+chmod +x *.sh && ./BuildMacOS.sh
 ```
 
 Build it manually:

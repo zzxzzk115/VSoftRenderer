@@ -92,7 +92,7 @@ Syntax: cpplint.py [--verbose=#] [--output=vs7] [--filter=-x,+y,...]
       "+FOO" means "do print categories that start with FOO".
 
       Examples: --filter=-whitespace,+whitespace/braces
-                --filter=whitespace,runtime/printf,+runtime/printf_format
+                --filter=whitespace,Runtime/printf,+Runtime/printf_format
                 --filter=-,+build/include_what_you_use
 
       To see a list of all the categories used in cpplint, pass no arg:
@@ -206,22 +206,22 @@ _ERROR_CATEGORIES = [
     'readability/strings',
     'readability/todo',
     'readability/utf8',
-    'runtime/arrays',
-    'runtime/casting',
-    'runtime/explicit',
-    'runtime/int',
-    'runtime/init',
-    'runtime/invalid_increment',
-    'runtime/member_string_references',
-    'runtime/memset',
-    'runtime/indentation_namespace',
-    'runtime/operator',
-    'runtime/printf',
-    'runtime/printf_format',
-    'runtime/references',
-    'runtime/string',
-    'runtime/threadsafe_fn',
-    'runtime/vlog',
+    'Runtime/arrays',
+    'Runtime/casting',
+    'Runtime/explicit',
+    'Runtime/int',
+    'Runtime/init',
+    'Runtime/invalid_increment',
+    'Runtime/member_string_references',
+    'Runtime/memset',
+    'Runtime/indentation_namespace',
+    'Runtime/operator',
+    'Runtime/printf',
+    'Runtime/printf_format',
+    'Runtime/references',
+    'Runtime/string',
+    'Runtime/threadsafe_fn',
+    'Runtime/vlog',
     'whitespace/blank_line',
     'whitespace/braces',
     'whitespace/comma',
@@ -1104,7 +1104,7 @@ def Error(filename, linenum, category, confidence, message):
     filename: The name of the file containing the error.
     linenum: The number of the line containing the error.
     category: A string used to describe the "category" this bug
-      falls under: "whitespace", say, or "runtime".  Categories
+      falls under: "whitespace", say, or "Runtime".  Categories
       may have a hierarchy separated by slashes: "whitespace/indent".
     confidence: A number from 1-5 representing a confidence score for
       the error, with 5 meaning that we are certain of the problem,
@@ -1928,7 +1928,7 @@ def CheckPosixThreading(filename, clean_lines, linenum, error):
     # Additional pattern matching check to confirm that this is the
     # function we are looking for
     if Search(pattern, line):
-      error(filename, linenum, 'runtime/threadsafe_fn', 2,
+      error(filename, linenum, 'Runtime/threadsafe_fn', 2,
             'Consider using ' + multithread_safe_func +
             '...) instead of ' + single_thread_func +
             '...) for improved thread safety.')
@@ -1948,7 +1948,7 @@ def CheckVlogArguments(filename, clean_lines, linenum, error):
   """
   line = clean_lines.elided[linenum]
   if Search(r'\bVLOG\((INFO|ERROR|WARNING|DFATAL|FATAL)\)', line):
-    error(filename, linenum, 'runtime/vlog', 5,
+    error(filename, linenum, 'Runtime/vlog', 5,
           'VLOG() should be used with numeric verbosity level.  '
           'Use LOG() if you want symbolic severity levels.')
 
@@ -1976,7 +1976,7 @@ def CheckInvalidIncrement(filename, clean_lines, linenum, error):
   """
   line = clean_lines.elided[linenum]
   if _RE_PATTERN_INVALID_INCREMENT.match(line):
-    error(filename, linenum, 'runtime/invalid_increment', 5,
+    error(filename, linenum, 'Runtime/invalid_increment', 5,
           'Changing pointer instead of value (or unused value of operator*).')
 
 
@@ -2603,11 +2603,11 @@ def CheckForNonStandardConstructs(filename, clean_lines, linenum,
   line = clean_lines.lines[linenum]
 
   if Search(r'printf\s*\(.*".*%[-+ ]?\d*q', line):
-    error(filename, linenum, 'runtime/printf_format', 3,
+    error(filename, linenum, 'Runtime/printf_format', 3,
           '%q in format strings is deprecated.  Use %ll instead.')
 
   if Search(r'printf\s*\(.*".*%\d+\$', line):
-    error(filename, linenum, 'runtime/printf_format', 2,
+    error(filename, linenum, 'Runtime/printf_format', 2,
           '%N$ formats are unconventional.  Try rewriting to avoid them.')
 
   # Remove escaped backslashes before looking for undefined escapes.
@@ -2649,7 +2649,7 @@ def CheckForNonStandardConstructs(filename, clean_lines, linenum,
     # Here's the original regexp, for the reference:
     # type_name = r'\w+((\s*::\s*\w+)|(\s*<\s*\w+?\s*>))?'
     # r'\s*const\s*' + type_name + '\s*&\s*\w+\s*;'
-    error(filename, linenum, 'runtime/member_string_references', 2,
+    error(filename, linenum, 'Runtime/member_string_references', 2,
           'const string& members are dangerous. It is much better to use '
           'alternatives, such as pointers or simple constants.')
 
@@ -2718,18 +2718,18 @@ def CheckForNonStandardConstructs(filename, clean_lines, linenum,
         not initializer_list_constructor and
         not copy_constructor):
       if defaulted_args:
-        error(filename, linenum, 'runtime/explicit', 5,
+        error(filename, linenum, 'Runtime/explicit', 5,
               'Constructors callable with one argument '
               'should be marked explicit.')
       else:
-        error(filename, linenum, 'runtime/explicit', 5,
+        error(filename, linenum, 'Runtime/explicit', 5,
               'Single-parameter constructors should be marked explicit.')
     elif is_marked_explicit and not onearg_constructor:
       if noarg_constructor:
-        error(filename, linenum, 'runtime/explicit', 5,
+        error(filename, linenum, 'Runtime/explicit', 5,
               'Zero-parameter constructors should not be marked explicit.')
       else:
-        error(filename, linenum, 'runtime/explicit', 0,
+        error(filename, linenum, 'Runtime/explicit', 0,
               'Constructors that require multiple arguments '
               'should not be marked explicit.')
 
@@ -4812,12 +4812,12 @@ def CheckLanguage(filename, clean_lines, linenum, file_extension,
   # we regularly allow is "unsigned short port" for port.
   if Search(r'\bshort port\b', line):
     if not Search(r'\bunsigned short port\b', line):
-      error(filename, linenum, 'runtime/int', 4,
+      error(filename, linenum, 'Runtime/int', 4,
             'Use "unsigned short" for ports, not "short"')
   else:
     match = Search(r'\b(short|long(?! +double)|long long)\b', line)
     if match:
-      error(filename, linenum, 'runtime/int', 4,
+      error(filename, linenum, 'Runtime/int', 4,
             'Use int16/int64/etc, rather than the C type %s' % match.group(1))
 
   # Check if some verboten operator overloading is going on
@@ -4827,7 +4827,7 @@ def CheckLanguage(filename, clean_lines, linenum, file_extension,
   # The trick is it's hard to tell apart from binary operator&:
   #   class Y { int operator&(const Y& x) { return 23; } }; // binary operator&
   if Search(r'\boperator\s*&\s*\(\s*\)', line):
-    error(filename, linenum, 'runtime/operator', 4,
+    error(filename, linenum, 'Runtime/operator', 4,
           'Unary operator& is dangerous.  Do not use it.')
 
   # Check for suspicious usage of "if" like
@@ -4849,14 +4849,14 @@ def CheckLanguage(filename, clean_lines, linenum, file_extension,
     if match and match.group(1) != '__VA_ARGS__':
       function_name = re.search(r'\b((?:string)?printf)\s*\(',
                                 line, re.I).group(1)
-      error(filename, linenum, 'runtime/printf', 4,
+      error(filename, linenum, 'Runtime/printf', 4,
             'Potential format string bug. Do %s("%%s", %s) instead.'
             % (function_name, match.group(1)))
 
   # Check for potential memset bugs like memset(buf, sizeof(buf), 0).
   match = Search(r'memset\s*\(([^,]*),\s*([^,]*),\s*0\s*\)', line)
   if match and not Match(r"^''|-?[0-9]+|0x[0-9A-Fa-f]$", match.group(2)):
-    error(filename, linenum, 'runtime/memset', 4,
+    error(filename, linenum, 'Runtime/memset', 4,
           'Did you mean "memset(%s, 0, %s)"?'
           % (match.group(1), match.group(2)))
 
@@ -4900,7 +4900,7 @@ def CheckLanguage(filename, clean_lines, linenum, file_extension,
       is_const = False
       break
     if not is_const:
-      error(filename, linenum, 'runtime/arrays', 1,
+      error(filename, linenum, 'Runtime/arrays', 1,
             'Do not use variable-length arrays.  Use an appropriately named '
             "('k' followed by CamelCase) compile-time constant for the size.")
 
@@ -4958,13 +4958,13 @@ def CheckGlobalStatic(filename, clean_lines, linenum, error):
       not Search(r'\bstring\b(\s+const)?\s*\*\s*(const\s+)?\w', line) and
       not Search(r'\boperator\W', line) and
       not Match(r'\s*(<.*>)?(::[a-zA-Z0-9_]+)*\s*\(([^"]|$)', match.group(3))):
-    error(filename, linenum, 'runtime/string', 4,
+    error(filename, linenum, 'Runtime/string', 4,
           'For a static/global string constant, use a C style string instead: '
           '"%schar %s[]".' %
           (match.group(1), match.group(2)))
 
   if Search(r'\b([A-Za-z0-9_]*_)\(\1\)', line):
-    error(filename, linenum, 'runtime/init', 4,
+    error(filename, linenum, 'Runtime/init', 4,
           'You seem to be initializing a member variable with itself.')
 
 
@@ -4983,17 +4983,17 @@ def CheckPrintf(filename, clean_lines, linenum, error):
   match = Search(r'snprintf\s*\(([^,]*),\s*([0-9]*)\s*,', line)
   if match and match.group(2) != '0':
     # If 2nd arg is zero, snprintf is used to calculate size.
-    error(filename, linenum, 'runtime/printf', 3,
+    error(filename, linenum, 'Runtime/printf', 3,
           'If you can, use sizeof(%s) instead of %s as the 2nd arg '
           'to snprintf.' % (match.group(1), match.group(2)))
 
   # Check if some verboten C functions are being used.
   if Search(r'\bsprintf\s*\(', line):
-    error(filename, linenum, 'runtime/printf', 5,
+    error(filename, linenum, 'Runtime/printf', 5,
           'Never use sprintf. Use snprintf instead.')
   match = Search(r'\b(strcpy|strcat)\s*\(', line)
   if match:
-    error(filename, linenum, 'runtime/printf', 4,
+    error(filename, linenum, 'Runtime/printf', 4,
           'Almost always, snprintf is better than %s' % match.group(1))
 
 
@@ -5209,7 +5209,7 @@ def CheckForNonConstReference(filename, clean_lines, linenum,
   decls = ReplaceAll(r'{[^}]*}', ' ', line)  # exclude function body
   for parameter in re.findall(_RE_PATTERN_REF_PARAM, decls):
     if not Match(_RE_PATTERN_CONST_REF_PARAM, parameter):
-      error(filename, linenum, 'runtime/references', 2,
+      error(filename, linenum, 'Runtime/references', 2,
             'Is this a non-const reference? '
             'If so, make const or use a pointer: ' +
             ReplaceAll(' *<', '<', parameter))
@@ -5328,7 +5328,7 @@ def CheckCasts(filename, clean_lines, linenum, error):
              'from a cast?  Wrapping the dereferenced expression in '
              'parentheses will make the binding more obvious'))
     else:
-      error(filename, linenum, 'runtime/casting', 4,
+      error(filename, linenum, 'Runtime/casting', 4,
             ('Are you taking an address of a cast?  '
              'This is dangerous: could be a temp var.  '
              'Take the address before doing the cast, rather than after'))
@@ -5899,7 +5899,7 @@ def CheckItemIndentationInNamespace(filename, raw_lines_no_comments, linenum,
                                     error):
   line = raw_lines_no_comments[linenum]
   if Match(r'^\s+', line):
-    error(filename, linenum, 'runtime/indentation_namespace', 4,
+    error(filename, linenum, 'Runtime/indentation_namespace', 4,
           'Do not indent within a namespace')
 
 
