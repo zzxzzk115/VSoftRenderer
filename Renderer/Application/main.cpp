@@ -168,43 +168,60 @@ int main()
 
     DirectionalLight light(Vector3Float(1, 1, 1).Normalized());
 
-    glViewPort(0, 0, ScreenWidth, ScreenHeight);
-
-    glClearColor({50, 50, 50, 255});
-    glClear();
-
     // Camera parameters
     Vector3Float eye(1 , 1, 3);
     Vector3Float center(0 , 0, 0);
     Vector3Float up(0, 1, 0);
 
-    Matrix4 modelMatrix = Matrix4::Identity();
-    Matrix4 viewMatrix = glLookAt(eye, center, up);
-    Matrix4 projectionMatrix = glProjection(eye, center);
-
-    Matrix4 mvp = projectionMatrix * viewMatrix * modelMatrix;
-
     glBindTexture(0, diffuseTexture);
     glBindTexture(1, normalTexture);
 
-    GouraudShader shader = {};
-    shader.UniformMVP = mvp;
-    shader.UniformMVPIT = mvp.InverseTranspose();
-    shader.UniformLightDirection = light.GetDirection();
-    shader.BindDiffuseTextureSlot = 0;
-    shader.BindNormalTextureSlot = 1;
-
-    glBindShader(0, &shader);
-
-    for (int meshIndex = 0; meshIndex < meshes.size(); ++meshIndex)
-    {
-        glBindMesh(meshIndex, meshes[meshIndex]);
-        glUseShaderProgram(0);
-        glDrawMeshIndexed(meshIndex);
-    }
-
     while (!window.ShouldClose())
     {
+        glViewPort(0, 0, ScreenWidth, ScreenHeight);
+
+        glClearColor({50, 50, 50, 255});
+        glClear();
+
+        if (IsKeyDown(KEY_A))
+        {
+            eye.X -= 1;
+        }
+        if (IsKeyDown(KEY_D))
+        {
+            eye.X += 1;
+        }
+        if (IsKeyDown(KEY_W))
+        {
+            eye.Y += 1;
+        }
+        if (IsKeyDown(KEY_S))
+        {
+            eye.Y -= 1;
+        }
+
+        Matrix4 modelMatrix = Matrix4::Identity();
+        Matrix4 viewMatrix = glLookAt(eye, center, up);
+        Matrix4 projectionMatrix = glProjection(eye, center);
+
+        Matrix4 mvp = projectionMatrix * viewMatrix * modelMatrix;
+
+        GouraudShader shader = {};
+        shader.UniformMVP = mvp;
+        shader.UniformMVPIT = mvp.InverseTranspose();
+        shader.UniformLightDirection = light.GetDirection();
+        shader.BindDiffuseTextureSlot = 0;
+        shader.BindNormalTextureSlot = 1;
+
+        glBindShader(0, &shader);
+
+        for (int meshIndex = 0; meshIndex < meshes.size(); ++meshIndex)
+        {
+            glBindMesh(meshIndex, meshes[meshIndex]);
+            glUseShaderProgram(0);
+            glDrawMeshIndexed(meshIndex);
+        }
+
         renderTexture.BeginMode();
             // Draw FrameBuffer
             DrawFrameBuffer();

@@ -124,7 +124,7 @@ Install prerequisite packages:
 
 ```bash
 sudo apt-get update
-sudo apt-get install build-essential cmake git clang libx11-dev libxrandr-dev libxrender-dev libglvnd-dev libxinerama-dev libxcursor-dev libxi-dev
+sudo apt-get install build-essential cmake git clang libx11-dev libxrandr-dev libxrender-dev libglvnd-dev libxinerama-dev libxcursor-dev libxi-dev libomp-dev
 ```
 
 ### MacOS

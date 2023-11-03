@@ -45,6 +45,7 @@ namespace VGL
     {
         Vector3Int p;
         auto aabb = GetAABB();
+        
         for (p.X = aabb.GetMin().X; p.X <= aabb.GetMax().X; ++p.X)
         {
             for (p.Y = aabb.GetMin().Y; p.Y <= aabb.GetMax().Y; ++p.Y)

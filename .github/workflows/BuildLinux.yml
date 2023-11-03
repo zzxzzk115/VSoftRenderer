@@ -16,6 +16,6 @@ jobs:
 
       - name: Install dependencies
         run: sudo apt-get update &&
-             sudo apt-get install build-essential cmake git libx11-dev libxrandr-dev libxrender-dev libglvnd-dev libxinerama-dev libxcursor-dev libxi-dev
+             sudo apt-get install build-essential cmake git libx11-dev libxrandr-dev libxrender-dev libglvnd-dev libxinerama-dev libxcursor-dev libxi-dev libomp-dev
       - name: Build
         run: chmod +x *.sh && ./BuildLinux.sh
