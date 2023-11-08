@@ -6,6 +6,8 @@
 
 #include "VGL/Color.h"
 
+#include <algorithm>
+
 namespace VGL
 {
     const Color Color::COLOR_WHITE = {255, 255, 255, 255};
@@ -71,11 +73,11 @@ namespace VGL
 
     Color        Color::Clamped() const
     {
-        Color clampedColor = *this;
-        std::clamp(clampedColor.R, static_cast<unsigned char>(0), static_cast<unsigned char>(255));
-        std::clamp(clampedColor.G, static_cast<unsigned char>(0), static_cast<unsigned char>(255));
-        std::clamp(clampedColor.B, static_cast<unsigned char>(0), static_cast<unsigned char>(255));
-        std::clamp(clampedColor.A, static_cast<unsigned char>(0), static_cast<unsigned char>(255));
+        Color clampedColor = {};
+        clampedColor.R = std::clamp(R, static_cast<unsigned char>(0), static_cast<unsigned char>(255));
+        clampedColor.G = std::clamp(G, static_cast<unsigned char>(0), static_cast<unsigned char>(255));
+        clampedColor.B = std::clamp(B, static_cast<unsigned char>(0), static_cast<unsigned char>(255));
+        clampedColor.A = std::clamp(A, static_cast<unsigned char>(0), static_cast<unsigned char>(255));
         return clampedColor;
     }
 } // namespace VGL
