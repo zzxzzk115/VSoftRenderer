@@ -10,10 +10,11 @@
 
 namespace VGL
 {
-    struct GouraudShader : public VGLShaderBase
+    struct PhongShader : public VGLShaderBase
     {
         int BindDiffuseTextureSlot;
         int BindNormalTextureSlot;
+        int BindSpecularTextureSlot;
 
         Vector3Float UniformLightDirection;
         Matrix4      UniformMVP;
@@ -32,8 +33,11 @@ namespace VGL
             Vector2Float uv = VaryingUVs[0] * bc.X + VaryingUVs[1] * bc.Y + VaryingUVs[2] * bc.Z;
             Vector3Float n = (UniformMVPIT * sample2D(BindNormalTextureSlot, uv.X, uv.Y).XYZ()).Normalized();
             Vector3Float l = (UniformMVP * UniformLightDirection).Normalized();
-            float intensity = std::max(0.0f, n * l);
-            gl_FragColor = sample2D(BindDiffuseTextureSlot, uv.X, uv.Y) * intensity;
+            Vector3Float r = (n*(n*l*2.f) - l).Normalized();
+            float diffuseIntensity = std::max(0.0f, n * l);
+            Color diffuseColor = sample2D(BindDiffuseTextureSlot, uv.X, uv.Y);
+            float specularIntensity = std::pow(std::max(0.0f, r.Z), sample2D(BindSpecularTextureSlot, uv.X, uv.Y).R / 1.0f);
+            gl_FragColor = (diffuseColor * (diffuseIntensity + 0.4f * specularIntensity)).Clamped().IgnoreAlpha();
             return false;
         }
     };

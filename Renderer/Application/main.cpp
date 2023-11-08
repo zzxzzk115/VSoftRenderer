@@ -7,8 +7,8 @@
 #include "VGL/DirectionalLight.h"
 #include "VGL/FrameBuffer.h"
 #include "VGL/Matrix4.h"
+#include "VGL/Shaders/Phong.h"
 #include "VGL/VGL.h"
-#include "VGL/Shaders/Gouraud.h"
 
 #include <raylib-cpp.hpp>
 
@@ -166,6 +166,18 @@ int main()
     VGL::Color* normalTextureColors = (VGL::Color*)LoadImageColors(normalTextureImageData);
     VGL::Texture2D normalTexture(normalTextureImageWidth, normalTextureImageHeight, normalTextureColors);
 
+    auto specularTextureImageData = raylib::Image("Resources/Textures/african_head/african_head_spec.tga");
+    if (!specularTextureImageData.IsReady())
+    {
+        std::cerr << "Failed to load texture!!!" << std::endl;
+        return -2;
+    }
+
+    int specularTextureImageWidth  = specularTextureImageData.width;
+    int specularTextureImageHeight = specularTextureImageData.height;
+    VGL::Color* specularTextureColors = (VGL::Color*)LoadImageColors(specularTextureImageData);
+    VGL::Texture2D specularTexture(specularTextureImageWidth, specularTextureImageHeight, specularTextureColors);
+
     DirectionalLight light(Vector3Float(1, 1, 1).Normalized());
 
     // Camera parameters
@@ -175,6 +187,7 @@ int main()
 
     glBindTexture(0, diffuseTexture);
     glBindTexture(1, normalTexture);
+    glBindTexture(2, specularTexture);
 
     while (!window.ShouldClose())
     {
@@ -206,12 +219,13 @@ int main()
 
         Matrix4 mvp = projectionMatrix * viewMatrix * modelMatrix;
 
-        GouraudShader shader = {};
+        PhongShader shader = {};
         shader.UniformMVP = mvp;
         shader.UniformMVPIT = mvp.InverseTranspose();
         shader.UniformLightDirection = light.GetDirection();
         shader.BindDiffuseTextureSlot = 0;
         shader.BindNormalTextureSlot = 1;
+        shader.BindSpecularTextureSlot = 2;
 
         glBindShader(0, &shader);
 

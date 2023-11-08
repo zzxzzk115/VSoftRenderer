@@ -26,87 +26,92 @@
 > 
 > - Gouraud Shading
 >   ![Gouraud](Media/Showcases/Gouraud.png)
-> - Gouraud Shading with Normal Texture
->   ![Gouraud Normal Texture](Media/Showcases/Gouraud_Normal_Texture.png)
+> - Phong Shading with Diffuse + Normal + Specular Textures
+>   ![Phong With Textures](Media/Showcases/Phong_With_Textures.png)
 
 ## Features
 
 - Cross Platform (Windows, Linux, macOS)
 - Light-weight Implementation
 - Programmable Shading Pipeline
-
-    - Define a shader through C++:
-        ```c++
-        struct GouraudShader : public VGLShaderBase
-        {
-            int BindDiffuseTextureSlot;
-            int BindNormalTextureSlot;
-            
-            Vector3Float UniformLightDirection;
-            Matrix4      UniformMVP;
-            Matrix4      UniformMVPIT;
-        
-            std::vector<Vector2Float> VaryingUVs {3};
-        
-            virtual void vert(int faceIndex, int vertexIndexInFace, Vector3Float& gl_Position) override
-            {
-                VaryingUVs[vertexIndexInFace] = TargetMesh->GetUV(faceIndex, vertexIndexInFace);
-                gl_Position = UniformMVP * gl_Position;
-            }
-        
-            virtual bool frag(Vector3Float bc, VGL::Color& gl_FragColor) override
-            {
-                Vector2Float uv = VaryingUVs[0] * bc.X + VaryingUVs[1] * bc.Y + VaryingUVs[2] * bc.Z;
-                Vector3Float n = (UniformMVPIT * sample2D(BindNormalTextureSlot, uv.X, uv.Y).XYZ()).Normalized();
-                Vector3Float l = (UniformMVP * UniformLightDirection).Normalized();
-                float intensity = std::max(0.0f, n * l);
-                gl_FragColor = sample2D(BindDiffuseTextureSlot, uv.X, uv.Y) * intensity;
-                return false;
-            }
-        };
-        ```
-      
-    - Use OpenGL-like APIs:
+  - Define a shader through C++:
       ```c++
-      // ... load meshes & textures from disk
-
-      glViewPort(0, 0, 800, 800);
-      
-      glClearColor({50, 50, 50, 255});
-      glClear();
-      
-      DirectionalLight light(Vector3Float(1, 1, 1).Normalized());
-
-      // Camera parameters
-      Vector3Float eye(1 , 1, 3);
-      Vector3Float center(0 , 0, 0);
-      Vector3Float up(0 , 1, 0);
-
-      Matrix4 modelMatrix = Matrix4::Identity();
-      Matrix4 viewMatrix = glLookAt(eye, center, up);
-      Matrix4 projectionMatrix = glProjection(eye, center);
-
-      Matrix4 mvp = projectionMatrix * viewMatrix * modelMatrix;
-
-      glBindTexture(0, diffuseTexture);
-      glBindTexture(1, normalTexture);
-    
-      GouraudShader shader = {};
-      shader.UniformMVP = mvp;
-      shader.UniformMVPIT = mvp.InverseTranspose();
-      shader.UniformLightDirection = light.GetDirection();
-      shader.BindDiffuseTextureSlot = 0;
-      shader.BindNormalTextureSlot = 1;
-    
-      glBindShader(0, &shader);
-    
-      for (int meshIndex = 0; meshIndex < meshes.size(); ++meshIndex)
+      struct PhongShader : public VGLShaderBase
       {
-          glBindMesh(meshIndex, meshes[meshIndex]);
-          glUseShaderProgram(0);
-          glDrawMeshIndexed(meshIndex);
-      }
+          int BindDiffuseTextureSlot;
+          int BindNormalTextureSlot;
+          int BindSpecularTextureSlot;
+
+          Vector3Float UniformLightDirection;
+          Matrix4      UniformMVP;
+          Matrix4      UniformMVPIT;
+    
+          std::vector<Vector2Float> VaryingUVs {3};
+    
+          virtual void vert(int faceIndex, int vertexIndexInFace, Vector3Float& gl_Position) override
+          {
+              VaryingUVs[vertexIndexInFace] = TargetMesh->GetUV(faceIndex, vertexIndexInFace);
+              gl_Position = UniformMVP * gl_Position;
+          }
+    
+          virtual bool frag(Vector3Float bc, VGL::Color& gl_FragColor) override
+          {
+              Vector2Float uv = VaryingUVs[0] * bc.X + VaryingUVs[1] * bc.Y + VaryingUVs[2] * bc.Z;
+              Vector3Float n = (UniformMVPIT * sample2D(BindNormalTextureSlot, uv.X, uv.Y).XYZ()).Normalized();
+              Vector3Float l = (UniformMVP * UniformLightDirection).Normalized();
+              Vector3Float r = (n*(n*l*2.f) - l).Normalized();
+              float diffuseIntensity = std::max(0.0f, n * l);
+              Color diffuseColor = sample2D(BindDiffuseTextureSlot, uv.X, uv.Y);
+              float specularIntensity = std::pow(std::max(0.0f, r.Z), sample2D(BindSpecularTextureSlot, uv.X, uv.Y).R / 1.0f);
+              gl_FragColor = (diffuseColor * (diffuseIntensity + 0.4f * specularIntensity)).Clamped().IgnoreAlpha();
+              return false;
+          }
+      };
       ```
+    
+  - Use OpenGL-like APIs:
+    ```c++
+    // ... load meshes & textures from disk
+
+    glViewPort(0, 0, 800, 800);
+      
+    glClearColor({50, 50, 50, 255});
+    glClear();
+      
+    DirectionalLight light(Vector3Float(1, 1, 1).Normalized());
+
+    // Camera parameters
+    Vector3Float eye(1 , 1, 3);
+    Vector3Float center(0 , 0, 0);
+    Vector3Float up(0 , 1, 0);
+
+    Matrix4 modelMatrix = Matrix4::Identity();
+    Matrix4 viewMatrix = glLookAt(eye, center, up);
+    Matrix4 projectionMatrix = glProjection(eye, center);
+
+    Matrix4 mvp = projectionMatrix * viewMatrix * modelMatrix;
+
+    glBindTexture(0, diffuseTexture);
+    glBindTexture(1, normalTexture);
+    glBindTexture(2, specularTexture);
+    
+    PhongShader shader = {};
+    shader.UniformMVP = mvp;
+    shader.UniformMVPIT = mvp.InverseTranspose();
+    shader.UniformLightDirection = light.GetDirection();
+    shader.BindDiffuseTextureSlot = 0;
+    shader.BindNormalTextureSlot = 1;
+    shader.BindSpecularTextureSlot = 2;
+    
+    glBindShader(0, &shader);
+    
+    for (int meshIndex = 0; meshIndex < meshes.size(); ++meshIndex)
+    {
+        glBindMesh(meshIndex, meshes[meshIndex]);
+        glUseShaderProgram(0);
+        glDrawMeshIndexed(meshIndex);
+    }
+    ```
 
 ## Prerequisites
 

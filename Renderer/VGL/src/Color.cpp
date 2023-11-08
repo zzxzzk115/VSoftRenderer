@@ -34,6 +34,14 @@ namespace VGL
                 static_cast<unsigned char>(A - other.A) };
     }
 
+    Color Color::operator*(const Color& other) const
+    {
+        return { static_cast<unsigned char>(R * other.R),
+                static_cast<unsigned char>(G * other.G),
+                static_cast<unsigned char>(B * other.B),
+                static_cast<unsigned char>(A * other.A) };
+    }
+
     Color Color::operator * (float scalar) const
     {
         return { static_cast<unsigned char>(R * scalar),
@@ -55,4 +63,19 @@ namespace VGL
     }
 
     Vector3Float Color::XYZ() const { return Vector3Float(R, G, B); }
+
+    Color        Color::IgnoreAlpha() const
+    {
+        return {R, G, B, 255};
+    }
+
+    Color        Color::Clamped() const
+    {
+        Color clampedColor = *this;
+        std::clamp(clampedColor.R, static_cast<unsigned char>(0), static_cast<unsigned char>(255));
+        std::clamp(clampedColor.G, static_cast<unsigned char>(0), static_cast<unsigned char>(255));
+        std::clamp(clampedColor.B, static_cast<unsigned char>(0), static_cast<unsigned char>(255));
+        std::clamp(clampedColor.A, static_cast<unsigned char>(0), static_cast<unsigned char>(255));
+        return clampedColor;
+    }
 } // namespace VGL

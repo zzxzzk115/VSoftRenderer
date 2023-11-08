@@ -25,10 +25,13 @@ namespace VGL
 
         Color operator + (const Color& other) const;
         Color operator - (const Color& other) const;
+        Color operator * (const Color& other) const;
         Color operator * (float scalar) const;
         Color operator / (float scalar) const;
 
         Vector3Float XYZ() const;
+        Color IgnoreAlpha() const;
+        Color Clamped() const;
 
         const static Color COLOR_WHITE;
         const static Color COLOR_BLACK;
