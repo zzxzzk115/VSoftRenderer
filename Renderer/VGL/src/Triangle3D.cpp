@@ -43,21 +43,30 @@ namespace VGL
 
     void Triangle3D::DrawInterpolated(VGLShaderBase* shader)
     {
-        Vector3Int p;
         auto aabb = GetAABB();
         
-        for (p.X = aabb.GetMin().X; p.X <= aabb.GetMax().X; ++p.X)
+        int minX = static_cast<int>(aabb.GetMin().X);
+        int minY = static_cast<int>(aabb.GetMin().Y);
+        int maxX = static_cast<int>(aabb.GetMax().X);
+        int maxY = static_cast<int>(aabb.GetMax().Y);
+
+#pragma omp parallel for
+        for (int x = minX; x <= maxX; ++x)
         {
-            for (p.Y = aabb.GetMin().Y; p.Y <= aabb.GetMax().Y; ++p.Y)
+            for (int y = minY; y <= maxY; ++y)
             {
-                Vector3Float bcScreen  = GetBarycentricCoordinates(Utils::Vector3Int2Float(p));
-                if (bcScreen.X < 0 || bcScreen.Y < 0 || bcScreen.Z < 0) continue;
+                Vector3Int p(x, y, 0); // Initialize p within the parallel loop
+
+                Vector3Float bcScreen = GetBarycentricCoordinates(Utils::Vector3Int2Float(p));
+                if (bcScreen.X < 0 || bcScreen.Y < 0 || bcScreen.Z < 0)
+                    continue;
+
                 // Interpolate Z value by barycentric coordinates
                 p.Z = static_cast<int>(m_Vertices[0].Z * bcScreen.X +
                                        m_Vertices[1].Z * bcScreen.Y +
                                        m_Vertices[2].Z * bcScreen.Z);
-                float zBufferValue =
-                    FrameBuffer::GetInstance()->GetZBufferValue(static_cast<int>(p.X), static_cast<int>(p.Y));
+
+                float zBufferValue = FrameBuffer::GetInstance()->GetZBufferValue(p.X, p.Y);
                 if (zBufferValue < p.Z)
                 {
                     Color color;
