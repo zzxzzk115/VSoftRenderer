@@ -28,7 +28,17 @@ if (NOT raylib_cpp_FOUND)
     FetchContent_MakeAvailable(raylib_cpp)
 endif()
 
-add_executable(${PROJECT_NAME} main.cpp)
+add_executable(${PROJECT_NAME} src/main.cpp
+        src/Loaders/TextureLoader.cpp
+        src/Loaders/ModelLoader.cpp)
+
+# Link dependencies
+target_include_directories(
+        ${PROJECT_NAME}
+        PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+        $<INSTALL_INTERFACE:include/${PROJECT_NAME}-${PROJECT_VERSION}>
+)
+
 #set(raylib_VERBOSE 1)
 target_link_libraries(${PROJECT_NAME} PUBLIC raylib raylib_cpp VGL tinyobjloader)
 # Web Configurations

@@ -64,9 +64,9 @@ namespace VGL
         g_vglState.ViewportMatrix[2][2] = g_vglState.ViewDepth / 2.0f;
     }
 
-    void glBindMesh(int meshSlot, Mesh& mesh)
+    void glBindMesh(int meshSlot, Mesh* mesh)
     {
-        g_vglState.MeshMap[meshSlot] = &mesh;
+        g_vglState.MeshMap[meshSlot] = mesh;
     }
 
     void glDrawMeshIndexed(int meshSlot)
@@ -100,9 +100,9 @@ namespace VGL
         }
     }
 
-    void glBindTexture(int textureSlot, Texture2D& texture2D)
+    void glBindTexture(int textureSlot, Texture2D* texture2D)
     {
-        g_vglState.TextureMap[textureSlot] = &texture2D;
+        g_vglState.TextureMap[textureSlot] = texture2D;
     }
 
     void glBindShader(int shaderSlot, VGLShaderBase* shader)
