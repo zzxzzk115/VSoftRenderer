@@ -185,9 +185,31 @@ int main()
     Vector3Float center(0 , 0, 0);
     Vector3Float up(0, 1, 0);
 
+    Matrix4 modelMatrix = Matrix4::Identity();
+    Matrix4 viewMatrix = glLookAt(eye, center, up);
+    Matrix4 projectionMatrix = glProjection(eye, center);
+
+    Matrix4 mvp = projectionMatrix * viewMatrix * modelMatrix;
+
     glBindTexture(0, diffuseTexture);
     glBindTexture(1, normalTexture);
     glBindTexture(2, specularTexture);
+
+    PhongShader* shader = new PhongShader();
+    shader->UniformMVP = mvp;
+    shader->UniformMVPIT = mvp.InverseTranspose();
+    shader->UniformLightDirection = light.GetDirection();
+    shader->BindDiffuseTextureSlot = 0;
+    shader->BindNormalTextureSlot = 1;
+    shader->BindSpecularTextureSlot = 2;
+
+    glBindShader(0, shader);
+    glUseShaderProgram(0);
+
+    for (int meshIndex = 0; meshIndex < meshes.size(); ++meshIndex)
+    {
+        glBindMesh(meshIndex, meshes[meshIndex]);
+    }
 
     while (!window.ShouldClose())
     {
@@ -213,26 +235,18 @@ int main()
             eye.Y -= 1;
         }
 
-        Matrix4 modelMatrix = Matrix4::Identity();
-        Matrix4 viewMatrix = glLookAt(eye, center, up);
-        Matrix4 projectionMatrix = glProjection(eye, center);
+        // update matrix
+        viewMatrix = glLookAt(eye, center, up);
+        projectionMatrix = glProjection(eye, center);
+        mvp = projectionMatrix * viewMatrix * modelMatrix;
 
-        Matrix4 mvp = projectionMatrix * viewMatrix * modelMatrix;
+        // update shader parameters
+        shader->UniformMVP = mvp;
+        shader->UniformMVPIT = mvp.InverseTranspose();
 
-        PhongShader shader = {};
-        shader.UniformMVP = mvp;
-        shader.UniformMVPIT = mvp.InverseTranspose();
-        shader.UniformLightDirection = light.GetDirection();
-        shader.BindDiffuseTextureSlot = 0;
-        shader.BindNormalTextureSlot = 1;
-        shader.BindSpecularTextureSlot = 2;
-
-        glBindShader(0, &shader);
-
+        // draw mesh
         for (int meshIndex = 0; meshIndex < meshes.size(); ++meshIndex)
         {
-            glBindMesh(meshIndex, meshes[meshIndex]);
-            glUseShaderProgram(0);
             glDrawMeshIndexed(meshIndex);
         }
 

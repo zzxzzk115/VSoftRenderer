@@ -47,16 +47,20 @@ namespace VGL
         for (int i = 0; i < m_Width * m_Height; ++i)
         {
             m_PixelData[i].PixelColor = clearColor;
+            m_ZBuffer[i] = 0;
         }
     }
 
     void FrameBuffer::SetSize(int width, int height)
     {
-        m_Width = width;
-        m_Height = height;
+        if (m_Width != width || m_Height != height)
+        {
+            m_Width = width;
+            m_Height = height;
 
-        m_PixelData = new Pixel[width * height];
-        m_ZBuffer = new float[width * height];
+            m_PixelData = new Pixel[width * height];
+            m_ZBuffer = new float[width * height];
+        }
     }
 
     Pixel FrameBuffer::GetPixel(int x, int y) const
